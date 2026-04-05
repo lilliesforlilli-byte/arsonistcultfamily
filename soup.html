@@ -2,84 +2,66 @@
 <html>
 <head>
   <title>Jayjay</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
       margin: 0;
+      font-family: Georgia, serif;
       background: linear-gradient(180deg, #020617, #051650);
       color: #e6f7ff;
-      font-family: Georgia, serif;
-      overflow-x: hidden;
       text-align: center;
     }
 
-    /* LOADING SCREEN */
-    #loading {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      background: #020617;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      color: #aeeaff;
-      font-size: 18px;
-      letter-spacing: 1px;
-    }
+    h1 { margin-bottom: 20px; }
 
-    .bar {
-      width: 220px;
-      height: 4px;
-      background: rgba(255,255,255,0.1);
-      margin-top: 20px;
-      overflow: hidden;
-      border-radius: 10px;
-    }
-
-    .progress {
-      height: 100%;
-      width: 0%;
-      background: #aeeaff;
-      animation: load 3s forwards;
-    }
-
-    @keyframes load {
-      to { width: 100%; }
-    }
-
-    /* MAIN CONTENT */
-    #main {
-      opacity: 0;
-      transition: opacity 1.5s ease;
+    .screen {
+      display: none;
       padding: 60px 20px;
     }
 
-    h1 {
-      font-size: 34px;
-      margin-bottom: 30px;
-      color: #d6f6ff;
-      text-shadow: 0 0 12px rgba(174,234,255,0.4);
+    .active {
+      display: block;
     }
 
-    p {
-      font-size: 17px;
-      line-height: 1.8;
-      margin-bottom: 18px;
-    }
-
-    /* SYSTEM TEXT */
-    .system {
-      font-size: 14px;
+    button {
+      padding: 14px 26px;
+      border-radius: 999px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      background: rgba(174,234,255,0.2);
       color: #aeeaff;
-      margin-bottom: 20px;
-      letter-spacing: 1px;
     }
 
-    /* CARD UI */
+    /* COMPANIONS */
+    .companions {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .comp-btn {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 20px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(174,234,255,0.2);
+      cursor: pointer;
+      width: 260px;
+    }
+
+    .comp-btn img {
+      width: 50px;
+      height: 50px;
+      border-radius: 8px;
+    }
+
+    /* CARD */
     .card {
       border: 1px solid rgba(174,234,255,0.2);
       padding: 20px;
@@ -87,174 +69,149 @@
       max-width: 500px;
       border-radius: 12px;
       background: rgba(10,20,40,0.4);
-      backdrop-filter: blur(6px);
-      box-shadow: 0 0 20px rgba(174,234,255,0.08);
       text-align: left;
     }
 
-    .card-title {
-      font-size: 14px;
-      color: #aeeaff;
-      margin-bottom: 10px;
-      letter-spacing: 1px;
-    }
-
-    /* LETTER */
     .letter {
-      margin-top: 60px;
-      padding-top: 30px;
-      border-top: 1px solid rgba(174,234,255,0.3);
       max-width: 650px;
-      margin-left: auto;
-      margin-right: auto;
+      margin: auto;
       text-align: left;
     }
 
-    /* BACK BUTTON */
-    .back-home {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 10px 20px;
-      border-radius: 999px;
-      background: rgba(174,234,255,0.15);
-      color: #aeeaff;
-      text-decoration: none;
-      font-size: 16px;
+    /* MUSIC PLAYER */
+    .music {
+      margin-top: 40px;
     }
 
-    /* SNOW */
-    .snow {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      background-image: radial-gradient(2px 2px at 20px 30px, #aeeaff, transparent),
-                        radial-gradient(2px 2px at 100px 80px, #d6f6ff, transparent);
-      background-size: 200px 200px;
-      animation: snow 12s linear infinite;
-      opacity: 0.5;
+    audio {
+      width: 250px;
+      margin-top: 10px;
     }
 
-    @keyframes snow {
-      from { background-position: 0 -200px; }
-      to { background-position: 0 100vh; }
-    }
   </style>
 </head>
 
 <body>
 
-<!-- LOADING -->
-<div id="loading">
-  <div>SYSTEM INITIALIZING...</div>
-  <div class="bar"><div class="progress"></div></div>
+<!-- SCREEN 1: START -->
+<div id="start" class="screen active">
+  <h1>Birthday Mission ❄️</h1>
+  <p>Ready to begin?</p>
+  <button onclick="startMission()">Start Mission</button>
 </div>
 
-<!-- MAIN -->
-<div id="main">
+<!-- SCREEN 2: CHOOSE -->
+<div id="choose" class="screen">
+  <h1>Select Companion</h1>
 
-  <div class="system">
-    Snow Mirage Unit Connected ❄️<br>
-    Pilot Detected: Jayjay<br>
-    Synchronization: Stable
+  <div class="companions">
+
+    <div class="comp-btn" onclick="chooseCompanion('snow')">
+      <img src="snow.png">
+      <div>Snow Mirage ❄️</div>
+    </div>
+
+    <div class="comp-btn" onclick="chooseCompanion('other1')">
+      <img src="comp2.png">
+      <div>Companion 2</div>
+    </div>
+
+    <div class="comp-btn" onclick="chooseCompanion('other2')">
+      <img src="comp3.png">
+      <div>Companion 3</div>
+    </div>
+
   </div>
+</div>
+
+<!-- SCREEN 3: SNOW MIRAGE INTRO -->
+<div id="snowIntro" class="screen">
+  <p>
+    Connection Established...<br>
+    Snow Mirage Unit Activated ❄️<br><br>
+    Pilot: Soup<br>
+    Synchronization: Stable<br><br>
+    …I’ll stay.
+  </p>
+
+  <button onclick="enterMain()">Continue</button>
+</div>
+
+<!-- SCREEN 4: MAIN PAGE -->
+<div id="main" class="screen">
 
   <h1>For Soup ❄️</h1>
 
-  <!-- BOND CARD -->
   <div class="card">
-    <div class="card-title">BOND STATUS</div>
+    <strong>BOND STATUS</strong><br>
     Trust: 100%<br>
     Loyalty: 100%<br>
     Connection: Unbreakable
   </div>
 
-  <!-- ABILITIES -->
-  <div class="card">
-    <div class="card-title">ABILITIES UNLOCKED</div>
-    Frost Guardian → Always protects<br>
-    Silent Support Unit → Always stays<br>
-    Heart Stability → Keeps everything steady
-  </div>
-
-  <!-- POEM -->
   <p>
     You feel like comfort that knows my name,<br>
-    Like laughter that eases the weight of the day.<br>
-    You show up steady, patient, kind,<br>
-    Always there, never leaving me behind.
+    Like laughter that eases the weight of the day.
   </p>
 
-  <p>
-    You protect without ever making it loud,<br>
-    Strong in your care, gentle and proud.<br>
-    When things get heavy, you help me breathe,<br>
-    Reminding me there’s more than what I see.
-  </p>
-
-  <p>
-    You’re brave in ways that feel so real,<br>
-    The kind of strength that knows how to heal.<br>
-    Funny, sweet, and endlessly true,<br>
-    The world feels warmer just knowing you.
-  </p>
-
-  <!-- LETTER -->
   <div class="letter">
-    <div class="card-title">CORE MESSAGE UNLOCKED</div>
-
     <p><strong>Hi, Weirdo.</strong></p>
 
     <p>
       Thank you for always being there for me.
-      Thank you for cheering me up when I’m feeling down.
-      Thank you for always believing in me,
-      even when I struggle to believe in myself.
-    </p>
-
-    <p>
-      You make everything feel lighter just by being you.
       You stay when things get hard.
       You don’t leave when it matters.
-      That kind of strength… is rare.
-    </p>
-
-    <p>
-      You’ve been a constant in my life,
-      someone I can rely on,
-      someone who stays.
-      You make me feel safe, cared for, and understood.
     </p>
 
     <p>
       You feel like family to me.
-      Like someone who chose me and keeps choosing me.
     </p>
 
     <p>
-      Thank you for everything.<br>
-      I’m so grateful for you, always.
+      I’m so grateful for you.
     </p>
 
-    <p>
-      <strong>Love,</strong><br>
-      your Bestie ❄️
-    </p>
+    <p><strong>Love, your Bestie ❄️</strong></p>
+  </div>
+
+  <!-- MUSIC -->
+  <div class="music">
+    <h3>🎧 Mission Soundtrack</h3>
+
+    <div>
+      <p>Track 1</p>
+      <audio controls src="song1.mp3"></audio>
+    </div>
+
+    <div>
+      <p>Track 2</p>
+      <audio controls src="song2.mp3"></audio>
+    </div>
+
   </div>
 
 </div>
 
-<a href="index.html" class="back-home">🏠 Back to Home</a>
-
-<div class="snow"></div>
-
 <script>
-  setTimeout(() => {
-    document.getElementById("loading").style.display = "none";
-    document.getElementById("main").style.opacity = "1";
-  }, 3000);
+  function startMission() {
+    document.getElementById("start").classList.remove("active");
+    document.getElementById("choose").classList.add("active");
+  }
+
+  function chooseCompanion(type) {
+    document.getElementById("choose").classList.remove("active");
+
+    if (type === "snow") {
+      document.getElementById("snowIntro").classList.add("active");
+    } else {
+      document.getElementById("main").classList.add("active");
+    }
+  }
+
+  function enterMain() {
+    document.getElementById("snowIntro").classList.remove("active");
+    document.getElementById("main").classList.add("active");
+  }
 </script>
 
 </body>
