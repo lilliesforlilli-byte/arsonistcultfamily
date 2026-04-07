@@ -139,14 +139,14 @@
     <p>Snow Mirage ❄️</p>
   </div>
 
-  <!-- DEATH KNELL -->
-  <div class="comp-btn death" onclick="chooseCompanion('gaia')">
+  <!-- GAIA -->
+  <div class="comp-btn gaia" onclick="chooseCompanion('gaia')">
     <img src="gaia.jpeg">
     <p>Gaia ☠️</p>
   </div>
 
-  <!-- DREADWOLF -->
-  <div class="comp-btn dread" onclick="chooseCompanion('skyfire')">
+  <!-- SKYFIRE -->
+  <div class="comp-btn skyfire" onclick="chooseCompanion('skyfire')">
     <img src="skyfire.jpeg">
     <p>Skyfire ⚡</p>
   </div>
@@ -184,7 +184,7 @@
       `;
     }
 
-    if (choice === "deathknell") {
+    if (choice === "gaia") {
       letter.innerHTML = `
         <p><strong>Mission Log: Gaia ☠️</strong></p>
         <p>Bold choice. Chaotic energy. Very you.</p>
@@ -193,7 +193,7 @@
       `;
     }
 
-    if (choice === "dreadwolf") {
+    if (choice === "skyfire") {
       letter.innerHTML = `
         <p><strong>Mission Log: Skyfire ⚡</strong></p>
         <p>Fast, sharp, unstoppable.</p>
