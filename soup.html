@@ -8,159 +8,81 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle, #020024, #000);
-      color: #fff;
+      background: black;
+      color: white;
       text-align: center;
+      overflow: hidden;
     }
-
-    h1 { margin-top: 40px; }
 
     .btn {
+      padding: 12px 20px;
       margin: 10px;
-      padding: 12px 25px;
-      border-radius: 25px;
+      border-radius: 20px;
       border: none;
-      background: #00c3ff;
+      background: cyan;
       cursor: pointer;
-      font-weight: bold;
-      transition: 0.2s;
-    }
-
-    .btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 15px #00c3ff;
     }
 
     .hidden { display: none; }
 
-    .companions {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 30px;
-      flex-wrap: wrap;
-    }
-
-    .comp-btn {
-      width: 150px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 15px;
-      padding: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .comp-btn:hover {
-      transform: translateY(-5px);
-    }
-
-    .comp-btn img {
-      width: 100%;
-      border-radius: 10px;
-    }
-
-    .letter {
-      max-width: 600px;
-      margin: 30px auto;
-      padding: 20px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px;
-      display: none;
-    }
-
-    /* GAME UI */
-    #game {
-      margin-top: 20px;
-    }
-
     .arena {
-      width: 90%;
-      height: 300px;
-      margin: 20px auto;
+      width: 100%;
+      height: 100vh;
       position: relative;
-      border-radius: 15px;
-      background: radial-gradient(circle, #0a0f2c, #000);
       overflow: hidden;
-      border: 2px solid rgba(255,255,255,0.2);
+      background: radial-gradient(circle, #0a0f2c, black);
     }
 
-    .character {
+    #player {
       position: absolute;
       bottom: 20px;
-      font-size: 50px;
-      transition: 0.2s;
+      left: 45%;
+      font-size: 40px;
     }
 
-    #player { left: 20%; }
-    #enemy { right: 20%; }
+    .bullet {
+      position: absolute;
+      font-size: 20px;
+    }
+
+    #enemy {
+      position: absolute;
+      top: 50px;
+      left: 40%;
+      font-size: 50px;
+    }
 
     .hp-bar {
       width: 80%;
-      height: 15px;
+      height: 10px;
       background: #333;
       margin: 5px auto;
       border-radius: 10px;
-      overflow: hidden;
     }
 
     .hp {
       height: 100%;
-      background: #00ff88;
+      background: lime;
       width: 100%;
-      transition: 0.3s;
     }
 
-    .enemy-hp { background: #ff3b3b; }
-
-    .controls {
-      margin-top: 10px;
-    }
-
-    #log {
-      margin-top: 10px;
-      min-height: 40px;
-    }
-
-    /* HIT EFFECT */
-    .hit {
-      animation: hitFlash 0.3s;
-    }
-
-    @keyframes hitFlash {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.3); }
-      100% { transform: scale(1); }
-    }
+    .enemy-hp { background: red; }
 
   </style>
 </head>
 
 <body>
 
-<h1>🎮 Mission: Jayjay</h1>
+<h2>🎮 Mission: Jayjay</h2>
 
-<button class="btn" onclick="startMission()">Start Mission</button>
+<button class="btn" onclick="startGame()">Start Game</button>
 
-<div id="companions" class="companions hidden">
-  <div class="comp-btn" onclick="chooseCompanion('snow')">
-    <img src="snowmirage.jpeg"><p>Snow ❄️</p>
-  </div>
-
-  <div class="comp-btn" onclick="chooseCompanion('gaia')">
-    <img src="gaia.jpeg"><p>Gaia ☠️</p>
-  </div>
-
-  <div class="comp-btn" onclick="chooseCompanion('skyfire')">
-    <img src="skyfire.jpeg"><p>Skyfire ⚡</p>
-  </div>
-</div>
-
-<div id="letter" class="letter"></div>
+<!-- MUSIC -->
+<audio id="bgm" loop src="song1.m4a"></audio>
+<audio id="shootSound" src="song2.m4a"></audio>
 
 <!-- GAME -->
-<div id="game" class="hidden">
-
-  <h2>⚔️ Battle Start</h2>
+<div id="game" class="arena hidden">
 
   <p>Player HP</p>
   <div class="hp-bar"><div id="playerHP" class="hp"></div></div>
@@ -168,118 +90,104 @@
   <p>Enemy HP</p>
   <div class="hp-bar"><div id="enemyHP" class="hp enemy-hp"></div></div>
 
-  <div class="arena">
-    <div id="player" class="character">🤖</div>
-    <div id="enemy" class="character">👾</div>
-  </div>
-
-  <div class="controls">
-    <button class="btn" onclick="attack()">Attack ⚡</button>
-    <button class="btn" onclick="heal()">Heal 💚</button>
-    <button class="btn" onclick="special()">Special 💥</button>
-  </div>
-
-  <p id="log"></p>
+  <div id="player">🤖</div>
+  <div id="enemy">👾</div>
 
 </div>
 
 <script>
-  let playerHP = 100;
-  let enemyHP = 100;
-  let companion = "";
+let player = document.getElementById("player");
+let enemy = document.getElementById("enemy");
 
-  function startMission() {
-    document.getElementById("companions").classList.remove("hidden");
-  }
+let playerHP = 100;
+let enemyHP = 100;
 
-  function chooseCompanion(choice) {
-    companion = choice;
+let playerX = 45;
+let enemyX = 40;
 
-    const letter = document.getElementById("letter");
+function startGame() {
+  document.getElementById("game").classList.remove("hidden");
+  document.getElementById("bgm").play();
+  gameLoop();
+}
 
-    letter.innerHTML = `
-      <p><strong>Companion Selected:</strong> ${choice.toUpperCase()}</p>
-      <button class="btn" onclick="startGame()">🚀 Enter Battle</button>
-    `;
+// MOVEMENT (KEYBOARD)
+document.addEventListener("keydown", (e) => {
+  if (e.key === "a") playerX -= 3;
+  if (e.key === "d") playerX += 3;
+  if (e.key === " ") shoot();
 
-    letter.style.display = "block";
-  }
+  player.style.left = playerX + "%";
+});
 
-  function startGame() {
-    document.getElementById("game").classList.remove("hidden");
-    updateBars();
-  }
+// SHOOT
+function shoot() {
+  const bullet = document.createElement("div");
+  bullet.classList.add("bullet");
+  bullet.innerHTML = "⚡";
+  bullet.style.left = playerX + "%";
+  bullet.style.bottom = "60px";
 
-  function updateBars() {
-    document.getElementById("playerHP").style.width = playerHP + "%";
-    document.getElementById("enemyHP").style.width = enemyHP + "%";
-  }
+  document.getElementById("game").appendChild(bullet);
 
-  function attack() {
-    let dmg = Math.floor(Math.random() * 15) + 5;
-    enemyHP -= dmg;
-    animate("enemy");
-    log("⚡ You dealt " + dmg + " damage!");
-    enemyTurn();
-  }
+  document.getElementById("shootSound").currentTime = 0;
+  document.getElementById("shootSound").play();
 
-  function heal() {
-    let heal = Math.floor(Math.random() * 10) + 5;
-    playerHP += heal;
-    if (playerHP > 100) playerHP = 100;
-    animate("player");
-    log("💚 You healed " + heal);
-    enemyTurn();
-  }
+  let pos = 60;
 
-  function special() {
-    let dmg;
+  const interval = setInterval(() => {
+    pos += 5;
+    bullet.style.bottom = pos + "px";
 
-    if (companion === "snow") dmg = 25;
-    if (companion === "gaia") dmg = 30;
-    if (companion === "skyfire") dmg = 20;
-
-    enemyHP -= dmg;
-    animate("enemy");
-    log("💥 SPECIAL HIT! " + dmg + " damage!");
-    enemyTurn();
-  }
-
-  function enemyTurn() {
-    if (enemyHP <= 0) {
-      endGame("🎉 YOU WIN!");
-      return;
+    // HIT DETECTION
+    if (pos > 400 && Math.abs(playerX - enemyX) < 10) {
+      enemyHP -= 10;
+      updateHP();
+      bullet.remove();
+      clearInterval(interval);
     }
 
-    setTimeout(() => {
-      let dmg = Math.floor(Math.random() * 12) + 5;
-      playerHP -= dmg;
-      animate("player");
-      log("👾 Enemy hit you for " + dmg);
+    if (pos > window.innerHeight) {
+      bullet.remove();
+      clearInterval(interval);
+    }
 
-      if (playerHP <= 0) {
-        endGame("💀 YOU LOST...");
-      }
+  }, 30);
+}
 
-      updateBars();
-    }, 700);
+// ENEMY MOVEMENT + ATTACK
+function gameLoop() {
 
-    updateBars();
+  setInterval(() => {
+    enemyX += (Math.random() * 10 - 5);
+    enemy.style.left = enemyX + "%";
+
+    // enemy attack
+    playerHP -= Math.floor(Math.random() * 5);
+    updateHP();
+
+    checkGame();
+  }, 1000);
+}
+
+// UPDATE HP
+function updateHP() {
+  document.getElementById("playerHP").style.width = playerHP + "%";
+  document.getElementById("enemyHP").style.width = enemyHP + "%";
+}
+
+// END GAME
+function checkGame() {
+  if (enemyHP <= 0) {
+    alert("🎉 YOU WIN!");
+    location.reload();
   }
 
-  function animate(target) {
-    const el = document.getElementById(target);
-    el.classList.add("hit");
-    setTimeout(() => el.classList.remove("hit"), 300);
+  if (playerHP <= 0) {
+    alert("💀 YOU LOST!");
+    location.reload();
   }
-
-  function endGame(msg) {
-    document.getElementById("log").innerHTML = msg;
-  }
-
-  function log(text) {
-    document.getElementById("log").innerHTML = text;
-  }
+}
 </script>
 
 </body>
