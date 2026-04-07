@@ -8,19 +8,24 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #020024, #000);
+      background: black;
       color: white;
-      text-align: center;
       overflow: hidden;
+      cursor: crosshair;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 30px;
     }
 
     .btn {
       padding: 12px 25px;
-      margin: 10px;
       border-radius: 25px;
       border: none;
       background: #00c3ff;
       cursor: pointer;
+      margin: 10px;
     }
 
     .hidden { display: none; }
@@ -45,6 +50,67 @@
       border-radius: 10px;
     }
 
+    /* GAME */
+    #game {
+      position: fixed;
+      inset: 0;
+      display: none;
+      background:
+        radial-gradient(circle at center, #0a0f2c, #000),
+        repeating-linear-gradient(0deg, rgba(0,255,255,0.08) 0px, transparent 2px, transparent 40px),
+        repeating-linear-gradient(90deg, rgba(0,255,255,0.08) 0px, transparent 2px, transparent 40px);
+    }
+
+    #player {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 45px;
+    }
+
+    #enemy {
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 55px;
+    }
+
+    .bullet {
+      position: absolute;
+      font-size: 14px;
+      color: #00c3ff;
+    }
+
+    .enemyBullet {
+      color: red;
+    }
+
+    /* HUD */
+    .hud {
+      position: absolute;
+      top: 10px;
+      width: 100%;
+    }
+
+    .bar {
+      width: 80%;
+      height: 10px;
+      margin: 5px auto;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+
+    .fill {
+      height: 100%;
+      width: 100%;
+      border-radius: 10px;
+    }
+
+    #playerBar { background: #00ff88; }
+    #enemyBar { background: #ff3b3b; }
+
     /* DIALOGUE */
     #dialogueBox {
       position: fixed;
@@ -56,36 +122,8 @@
     }
 
     #choices button {
-      margin-top: 10px;
       display: block;
-    }
-
-    /* GAME */
-    #game {
-      position: fixed;
-      inset: 0;
-      display: none;
-      background: black;
-    }
-
-    #player {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 40px;
-    }
-
-    #enemy {
-      position: absolute;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 50px;
-    }
-
-    .bullet {
-      position: absolute;
+      margin-top: 10px;
     }
 
   </style>
@@ -94,7 +132,10 @@
 <body>
 
 <h2>🎮 Mission: Jayjay</h2>
-<button class="btn" onclick="startMission()">Start</button>
+
+<div style="text-align:center">
+  <button class="btn" onclick="startMission()">Start</button>
+</div>
 
 <div id="companions" class="companions hidden">
   <div class="comp-btn" onclick="chooseCompanion('snow')">
@@ -116,35 +157,57 @@
 
 <!-- GAME -->
 <div id="game">
+  <div class="hud">
+    <div class="bar"><div id="playerBar" class="fill"></div></div>
+    <div class="bar"><div id="enemyBar" class="fill"></div></div>
+  </div>
+
   <div id="player">🤖</div>
   <div id="enemy">👾</div>
 </div>
 
+<!-- AUDIO -->
 <audio id="bgm" loop src="song1.m4a"></audio>
-<audio id="shoot" src="song2.m4a"></audio>
+<audio id="shootSound" src="song2.m4a"></audio>
 
 <script>
 let companion = "snow";
+let playerHP = 100;
+let enemyHP = 100;
 
-// TYPEWRITER
+/* MEMORY */
+let memory = JSON.parse(localStorage.getItem("jayjay_memory")) || {
+  played: false,
+  bond: 0,
+  choseStay: false
+};
+
+function saveMemory() {
+  localStorage.setItem("jayjay_memory", JSON.stringify(memory));
+}
+
+/* TYPEWRITER */
 function typeText(text, callback) {
   let i = 0;
   let el = document.getElementById("dialogueText");
   el.innerHTML = "";
 
-  let interval = setInterval(() => {
-    el.innerHTML += text[i];
-    i++;
-    if (i >= text.length) {
-      clearInterval(interval);
-      if (callback) callback();
-    }
-  }, 25);
+  function type() {
+    if (i < text.length) {
+      el.innerHTML += text[i];
+      let delay = (text[i] === "." || text[i] === "…") ? 300 : 25;
+      i++;
+      setTimeout(type, delay);
+    } else if (callback) callback();
+  }
+
+  type();
 }
 
-// SHOW DIALOGUE
+/* DIALOGUE */
 function showDialogue(text, choices=[]) {
   document.getElementById("dialogueBox").classList.remove("hidden");
+
   let choiceDiv = document.getElementById("choices");
   choiceDiv.innerHTML = "";
 
@@ -159,7 +222,37 @@ function showDialogue(text, choices=[]) {
   });
 }
 
-// FLOW
+/* LINES */
+function getLine(type) {
+  if (companion === "snow") {
+    if (type === "intro") return memory.played ? "…you came back." : "…you picked me.";
+    if (type === "soft") return memory.choseStay ? "You always say that… but you mean it, don’t you?" : "I’ll stay. Even if you lose.";
+    if (type === "intro2") return "You don’t have to act strong here.";
+    if (type === "low") return memory.bond > 2 ? "Hey… don’t go. Not again." : "Don’t disappear on me.";
+    if (type === "win") return memory.bond > 2 ? "…you stayed this time." : "…you’re still here.";
+    if (type === "lose") return memory.bond > 2 ? "I told you I wouldn’t leave." : "It’s okay.";
+  }
+
+  if (companion === "gaia") {
+    if (type === "intro") return "Ohhh this is gonna be fun 😈";
+    if (type === "soft") return "Relax. I’ve got you.";
+    if (type === "intro2") return "Let’s wreck them.";
+    if (type === "low") return "HEY stay with me!";
+    if (type === "win") return "HAHA we destroyed them!";
+    if (type === "lose") return "…you scared me.";
+  }
+
+  if (companion === "skyfire") {
+    if (type === "intro") return "Connection established.";
+    if (type === "soft") return "I will remain online.";
+    if (type === "intro2") return "Engaging combat mode.";
+    if (type === "low") return "Warning: critical.";
+    if (type === "win") return "Mission complete.";
+    if (type === "lose") return "System failure…";
+  }
+}
+
+/* FLOW */
 function startMission() {
   document.getElementById("companions").classList.remove("hidden");
 }
@@ -167,55 +260,38 @@ function startMission() {
 function chooseCompanion(c) {
   companion = c;
 
-  showDialogue(
-    getLine("intro"),
-    [
-      { text: "I'm ready.", action: intro2 },
-      { text: "Stay with me.", action: introAlt }
-    ]
-  );
+  showDialogue(getLine("intro"), [
+    { text: "…okay.", action: intro2 },
+    { text: "stay with me.", action: introSoft }
+  ]);
+}
+
+function introSoft() {
+  memory.bond += 2;
+  memory.choseStay = true;
+  saveMemory();
+
+  showDialogue(getLine("soft"), [
+    { text: "start mission", action: startGame }
+  ]);
 }
 
 function intro2() {
-  showDialogue(getLine("ready"), [
-    { text: "Start battle", action: startGame }
+  memory.bond += 1;
+  saveMemory();
+
+  showDialogue(getLine("intro2"), [
+    { text: "start mission", action: startGame }
   ]);
 }
 
-function introAlt() {
-  showDialogue(getLine("soft"), [
-    { text: "Start battle", action: startGame }
-  ]);
-}
-
-// COMPANION LINES
-function getLine(type) {
-  if (companion === "snow") {
-    if (type === "intro") return "…You chose me.";
-    if (type === "ready") return "Then don’t hesitate.";
-    if (type === "soft") return "I’m not going anywhere.";
-  }
-
-  if (companion === "gaia") {
-    if (type === "intro") return "Ohhh this is gonna be fun 😈";
-    if (type === "ready") return "Let’s wreck them.";
-    if (type === "soft") return "Relax, I’ve got your back.";
-  }
-
-  if (companion === "skyfire") {
-    if (type === "intro") return "Connection established.";
-    if (type === "ready") return "Engaging combat mode.";
-    if (type === "soft") return "I will remain online.";
-  }
-}
-
-// GAME START
+/* GAME */
 function startGame() {
   document.getElementById("game").style.display = "block";
   document.getElementById("bgm").play();
 }
 
-// SHOOT
+/* SHOOT */
 document.addEventListener("click", e => {
   if (!document.getElementById("game").style.display) return;
 
@@ -227,19 +303,72 @@ document.addEventListener("click", e => {
 
   document.body.appendChild(b);
 
-  let s = document.getElementById("shoot");
+  let s = document.getElementById("shootSound");
   s.currentTime = 0;
   s.play();
 
   let i = setInterval(() => {
     b.style.top = (b.offsetTop - 8) + "px";
 
-    if (b.offsetTop < 100) {
+    if (b.offsetTop < 120) {
+      enemyHP -= 5;
+      updateHP();
       b.remove();
       clearInterval(i);
     }
+
+    if (b.offsetTop < 0) {
+      b.remove();
+      clearInterval(i);
+    }
+
   }, 16);
 });
+
+/* ENEMY */
+setInterval(() => {
+  if (!document.getElementById("game").style.display) return;
+
+  playerHP -= Math.random() * 3;
+  updateHP();
+
+}, 1000);
+
+/* HP */
+function updateHP() {
+  document.getElementById("playerBar").style.width = playerHP + "%";
+  document.getElementById("enemyBar").style.width = enemyHP + "%";
+
+  if (playerHP < 30) showDialogue(getLine("low"));
+
+  if (enemyHP <= 0) {
+    memory.played = true;
+    saveMemory();
+
+    setTimeout(() => {
+      if (companion === "snow" && memory.bond > 2) {
+        showDialogue("…hey.\n\nnext time you start this game… I’ll still be here.");
+      } else {
+        showDialogue(getLine("win"));
+      }
+    }, 600);
+  }
+
+  if (playerHP <= 0) {
+    setTimeout(() => {
+      showDialogue(getLine("lose"));
+    }, 600);
+  }
+}
+
+/* RETURN MESSAGE */
+window.onload = () => {
+  if (memory.played) {
+    setTimeout(() => {
+      showDialogue("…you came back.");
+    }, 800);
+  }
+};
 </script>
 
 </body>
