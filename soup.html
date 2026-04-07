@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mission: Soup 🎮</title>
+  <title>Mission: Jayjay 🎮</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -127,7 +127,7 @@
 
 <div class="snow-bg"></div>
 
-<h1>🎮 Mission: Soup's Birthday</h1>
+<h1>🎮 Mission: Jayjay's Birthday</h1>
 
 <button class="btn" onclick="startMission()">Start Mission</button>
 
@@ -135,19 +135,19 @@
 
   <!-- SNOW MIRAGE -->
   <div class="comp-btn snow" onclick="chooseCompanion('snow')">
-    <img src="snowmirage.jpg">
+    <img src="snowmirage.jpeg">
     <p>Snow Mirage ❄️</p>
   </div>
 
   <!-- DEATH KNELL -->
-  <div class="comp-btn death" onclick="chooseCompanion('deathknell')">
-    <img src="deathknell.png">
+  <div class="comp-btn death" onclick="chooseCompanion('gaia')">
+    <img src="gaia.jpeg">
     <p>Gaia ☠️</p>
   </div>
 
   <!-- DREADWOLF -->
-  <div class="comp-btn dread" onclick="chooseCompanion('dreadwolf')">
-    <img src="dreadwolf.jpg">
+  <div class="comp-btn dread" onclick="chooseCompanion('skyfire')">
+    <img src="skyfire.jpeg">
     <p>Skyfire ⚡</p>
   </div>
 
@@ -159,9 +159,8 @@
   <h3>sound1</h3>
 
   <!-- REPLACE WITH YOUR FILES -->
-  <button class="btn" onclick="playMusic('song1.mp3')">Track 1</button>
-  <button class="btn" onclick="playMusic('song2.mp3')">Track 2</button>
-  <button class="btn" onclick="playMusic('song3.mp3')">Track 3</button>
+  <button class="btn" onclick="playMusic('song1.m4a')">Track 1</button>
+  <button class="btn" onclick="playMusic('song2.m4a')">Track 2</button>
 
   <br>
   <audio id="player" controls></audio>
@@ -187,7 +186,7 @@
 
     if (choice === "deathknell") {
       letter.innerHTML = `
-        <p><strong>Mission Log: Death Knell ☠️</strong></p>
+        <p><strong>Mission Log: Gaia ☠️</strong></p>
         <p>Bold choice. Chaotic energy. Very you.</p>
         <p>You bring chaos in the best way—laughter, energy, and life into everything.</p>
         <p>But behind that? You're one of the most genuine people I know.</p>
@@ -196,11 +195,10 @@
 
     if (choice === "dreadwolf") {
       letter.innerHTML = `
-        <p><strong>Mission Log: Dreadwolf ⚡</strong></p>
+        <p><strong>Mission Log: Skyfire ⚡</strong></p>
         <p>Fast, sharp, unstoppable.</p>
-        <p>You don’t hesitate—you move, you act, you protect.</p>
+        <p>You don’t hesitate, you move, you act, you protect.</p>
         <p>There’s something powerful about the way you face things head-on.</p>
-        <p>I admire that more than you know.</p>
       `;
     }
 
