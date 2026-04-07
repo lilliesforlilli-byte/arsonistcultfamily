@@ -20,7 +20,7 @@
     }
 
     .btn {
-      margin-top: 30px;
+      margin-top: 20px;
       padding: 14px 30px;
       font-size: 18px;
       border: none;
@@ -64,21 +64,9 @@
       border-radius: 12px;
     }
 
-    /* UNIQUE GLOWS */
-    .snow:hover {
-      box-shadow: 0 0 20px #4cc9f0;
-      transform: translateY(-6px);
-    }
-
-    .death:hover {
-      box-shadow: 0 0 20px #ff006e;
-      transform: translateY(-6px);
-    }
-
-    .dread:hover {
-      box-shadow: 0 0 20px #ffd60a;
-      transform: translateY(-6px);
-    }
+    .snow:hover { box-shadow: 0 0 20px #4cc9f0; transform: translateY(-6px); }
+    .gaia:hover { box-shadow: 0 0 20px #ff006e; transform: translateY(-6px); }
+    .skyfire:hover { box-shadow: 0 0 20px #ffd60a; transform: translateY(-6px); }
 
     .letter {
       max-width: 600px;
@@ -120,6 +108,47 @@
       0% { background-position: 0 -200px; }
       100% { background-position: 0 100vh; }
     }
+
+    /* GAME ARENA */
+    #game {
+      margin-top: 50px;
+    }
+
+    .arena {
+      position: relative;
+      width: 90%;
+      height: 300px;
+      margin: 30px auto;
+      border-radius: 20px;
+      background: radial-gradient(circle, #0a0f2c, #000);
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    #player, #enemy {
+      position: absolute;
+      bottom: 20px;
+      font-size: 40px;
+      transition: 0.2s;
+    }
+
+    #player {
+      left: 50%;
+    }
+
+    #enemy {
+      right: 10%;
+    }
+
+    .controls {
+      margin-top: 20px;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+
   </style>
 </head>
 
@@ -133,19 +162,16 @@
 
 <div id="companions" class="companions hidden">
 
-  <!-- SNOW MIRAGE -->
   <div class="comp-btn snow" onclick="chooseCompanion('snow')">
     <img src="snowmirage.jpeg">
     <p>Snow Mirage ❄️</p>
   </div>
 
-  <!-- GAIA -->
   <div class="comp-btn gaia" onclick="chooseCompanion('gaia')">
     <img src="gaia.jpeg">
     <p>Gaia ☠️</p>
   </div>
 
-  <!-- SKYFIRE -->
   <div class="comp-btn skyfire" onclick="chooseCompanion('skyfire')">
     <img src="skyfire.jpeg">
     <p>Skyfire ⚡</p>
@@ -157,16 +183,34 @@
 
 <div id="music" class="music hidden">
   <h3>Mission Soundtracks</h3>
-
-  <!-- REPLACE WITH YOUR FILES -->
   <button class="btn" onclick="playMusic('song1.m4a')">Track 1</button>
   <button class="btn" onclick="playMusic('song2.m4a')">Track 2</button>
-
   <br>
-  <audio id="player" controls></audio>
+  <audio id="playerAudio" controls></audio>
+</div>
+
+<!-- GAME -->
+<div id="game" class="hidden">
+  <h2>⚔️ Mecha Battle Initiated</h2>
+
+  <div class="arena">
+    <div id="player">🤖</div>
+    <div id="enemy">👾</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="move('left')">⬅️</button>
+    <button class="btn" onclick="attack()">⚡ Attack</button>
+    <button class="btn" onclick="move('right')">➡️</button>
+  </div>
+
+  <p id="status">Enemy HP: 100</p>
 </div>
 
 <script>
+  let playerPos = 50;
+  let enemyHP = 100;
+
   function startMission() {
     document.getElementById("companions").classList.remove("hidden");
   }
@@ -179,7 +223,6 @@
         <p><strong>Mission Log: Snow Mirage ❄️</strong></p>
         <p>You chose the calmest and strongest one… just like you.</p>
         <p>You’ve always been someone who stays, who protects, who cares quietly but deeply.</p>
-        <p>That kind of strength? Not everyone has it.</p>
         <p>Happy Birthday, weirdo 💙</p>
       `;
     }
@@ -188,8 +231,7 @@
       letter.innerHTML = `
         <p><strong>Mission Log: Gaia ☠️</strong></p>
         <p>Bold choice. Chaotic energy. Very you.</p>
-        <p>You bring chaos in the best way—laughter, energy, and life into everything.</p>
-        <p>But behind that? You're one of the most genuine people I know.</p>
+        <p>You bring chaos in the best way.</p>
       `;
     }
 
@@ -197,17 +239,49 @@
       letter.innerHTML = `
         <p><strong>Mission Log: Skyfire ⚡</strong></p>
         <p>Fast, sharp, unstoppable.</p>
-        <p>You don’t hesitate, you move, you act, you protect.</p>
-        <p>There’s something powerful about the way you face things head-on.</p>
+        <p>You face everything head-on.</p>
       `;
     }
+
+    letter.innerHTML += `
+      <br><br>
+      <button class="btn" onclick="launchGame()">🚀 Start Battle</button>
+    `;
 
     letter.style.display = "block";
     document.getElementById("music").classList.remove("hidden");
   }
 
-  function playMusic(file) {
+  function launchGame() {
+    document.getElementById("game").classList.remove("hidden");
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  }
+
+  function move(direction) {
     const player = document.getElementById("player");
+
+    if (direction === "left") playerPos -= 10;
+    if (direction === "right") playerPos += 10;
+
+    player.style.left = playerPos + "%";
+  }
+
+  function attack() {
+    const status = document.getElementById("status");
+
+    let damage = Math.floor(Math.random() * 20) + 5;
+    enemyHP -= damage;
+
+    if (enemyHP <= 0) {
+      enemyHP = 0;
+      status.innerHTML = "🎉 Enemy Destroyed! Mission Complete.";
+    } else {
+      status.innerHTML = "Enemy HP: " + enemyHP + " (-" + damage + ")";
+    }
+  }
+
+  function playMusic(file) {
+    const player = document.getElementById("playerAudio");
     player.src = file;
     player.play();
   }
