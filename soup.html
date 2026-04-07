@@ -7,14 +7,17 @@
   <style>
     body {
       margin: 0;
+      background: black;
+      color: white;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom, #020024, #090979, #000);
-      color: #fff;
-      text-align: center;
-      overflow-x: hidden;
+      overflow: hidden;
+      cursor: crosshair;
     }
 
-    h1 { margin-top: 60px; }
+    h1 {
+      text-align: center;
+      margin-top: 40px;
+    }
 
     .btn {
       padding: 14px 30px;
@@ -24,12 +27,6 @@
       color: black;
       cursor: pointer;
       box-shadow: 0 0 15px #00c3ff;
-      transition: 0.3s;
-    }
-
-    .btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 25px #00c3ff;
     }
 
     .hidden { display: none; }
@@ -37,16 +34,15 @@
     .companions {
       display: flex;
       justify-content: center;
-      gap: 25px;
+      gap: 20px;
       margin-top: 40px;
-      flex-wrap: wrap;
     }
 
     .comp-btn {
-      width: 150px;
+      width: 140px;
       padding: 10px;
-      border-radius: 15px;
       background: rgba(255,255,255,0.05);
+      border-radius: 15px;
       cursor: pointer;
     }
 
@@ -56,69 +52,69 @@
     }
 
     .letter {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background: rgba(255,255,255,0.08);
-      border-radius: 10px;
-      display: none;
+      text-align: center;
+      margin-top: 20px;
     }
 
-    /* GAME OVERLAY */
-    #gameOverlay {
+    /* GAME */
+    #game {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, #0a0f2c, #000);
+      inset: 0;
       display: none;
-      overflow: hidden;
+      background:
+        radial-gradient(circle at center, #0a0f2c, #000),
+        repeating-linear-gradient(0deg, rgba(0,255,255,0.1) 0px, transparent 2px, transparent 40px),
+        repeating-linear-gradient(90deg, rgba(0,255,255,0.1) 0px, transparent 2px, transparent 40px);
     }
 
     #player {
       position: absolute;
       bottom: 40px;
-      left: 45%;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 45px;
-    }
-
-    .bullet {
-      position: absolute;
-      font-size: 18px;
-      color: #00c3ff;
     }
 
     #enemy {
       position: absolute;
       top: 80px;
-      left: 45%;
+      left: 50%;
+      transform: translateX(-50%);
       font-size: 55px;
     }
 
+    .bullet {
+      position: absolute;
+      font-size: 14px;
+    }
+
+    .enemyBullet {
+      color: red;
+    }
+
+    /* HUD */
     .hud {
       position: absolute;
       top: 10px;
       width: 100%;
     }
 
-    .hp-bar {
+    .bar {
       width: 80%;
-      height: 12px;
+      height: 10px;
       margin: 5px auto;
       background: rgba(255,255,255,0.1);
       border-radius: 10px;
     }
 
-    .hp {
+    .fill {
       height: 100%;
       width: 100%;
       border-radius: 10px;
-      transition: 0.3s;
     }
 
-    .playerHP { background: #00ff88; }
-    .enemyHP { background: #ff3b3b; }
+    #playerBar { background: #00ff88; }
+    #enemyBar { background: #ff3b3b; }
 
   </style>
 </head>
@@ -126,16 +122,18 @@
 <body>
 
 <h1>🎮 Mission: Jayjay</h1>
+<div style="text-align:center">
 <button class="btn" onclick="startMission()">Start Mission</button>
+</div>
 
 <div id="companions" class="companions hidden">
-  <div class="comp-btn" onclick="chooseCompanion('snow')">
+  <div class="comp-btn" onclick="chooseCompanion()">
     <img src="snowmirage.jpeg"><p>Snow ❄️</p>
   </div>
-  <div class="comp-btn" onclick="chooseCompanion('gaia')">
+  <div class="comp-btn" onclick="chooseCompanion()">
     <img src="gaia.jpeg"><p>Gaia ☠️</p>
   </div>
-  <div class="comp-btn" onclick="chooseCompanion('skyfire')">
+  <div class="comp-btn" onclick="chooseCompanion()">
     <img src="skyfire.jpeg"><p>Skyfire ⚡</p>
   </div>
 </div>
@@ -143,25 +141,20 @@
 <div id="letter" class="letter"></div>
 
 <!-- GAME -->
-<div id="gameOverlay">
-
+<div id="game">
   <div class="hud">
-    <div class="hp-bar"><div id="pHP" class="hp playerHP"></div></div>
-    <div class="hp-bar"><div id="eHP" class="hp enemyHP"></div></div>
+    <div class="bar"><div id="playerBar" class="fill"></div></div>
+    <div class="bar"><div id="enemyBar" class="fill"></div></div>
   </div>
 
   <div id="player">🤖</div>
   <div id="enemy">👾</div>
-
 </div>
 
-<!-- AUDIO -->
 <audio id="bgm" loop src="song1.m4a"></audio>
-<audio id="shoot" src="song2.m4a"></audio>
+<audio id="shootSound" src="song2.m4a"></audio>
 
 <script>
-let playerX = 45;
-let enemyX = 45;
 let playerHP = 100;
 let enemyHP = 100;
 
@@ -169,78 +162,91 @@ function startMission() {
   document.getElementById("companions").classList.remove("hidden");
 }
 
-function chooseCompanion(choice) {
+function chooseCompanion() {
   document.getElementById("letter").innerHTML =
-    `<p>Companion Selected: ${choice}</p>
-     <button class="btn" onclick="startGame()">🚀 Start Battle</button>`;
-  document.getElementById("letter").style.display = "block";
+    `<button class="btn" onclick="startGame()">🚀 Start Battle</button>`;
 }
 
 function startGame() {
-  document.getElementById("gameOverlay").style.display = "block";
+  document.getElementById("game").style.display = "block";
   document.getElementById("bgm").play();
 }
 
-// MOVEMENT
-document.addEventListener("keydown", e => {
-  if (e.key === "a") playerX -= 3;
-  if (e.key === "d") playerX += 3;
-  if (e.key === " ") shoot();
+// PLAYER SHOOT (CLICK)
+document.addEventListener("click", shoot);
 
-  document.getElementById("player").style.left = playerX + "%";
-});
+function shoot(e) {
+  if (!document.getElementById("game").style.display) return;
 
-// SHOOT
-function shoot() {
   let bullet = document.createElement("div");
   bullet.className = "bullet";
-  bullet.innerHTML = "⚡";
-  bullet.style.left = playerX + "%";
-  bullet.style.bottom = "60px";
+  bullet.innerHTML = "•";
+  bullet.style.left = e.clientX + "px";
+  bullet.style.top = (window.innerHeight - 80) + "px";
 
-  document.getElementById("gameOverlay").appendChild(bullet);
+  document.body.appendChild(bullet);
 
-  let shootSound = document.getElementById("shoot");
+  let shootSound = document.getElementById("shootSound");
   shootSound.currentTime = 0;
   shootSound.play();
 
-  let pos = 60;
+  let interval = setInterval(() => {
+    bullet.style.top = (bullet.offsetTop - 8) + "px";
 
-  let move = setInterval(() => {
-    pos += 6;
-    bullet.style.bottom = pos + "px";
-
-    if (pos > 400 && Math.abs(playerX - enemyX) < 8) {
-      enemyHP -= 10;
+    if (Math.abs(bullet.offsetLeft - window.innerWidth/2) < 50 &&
+        bullet.offsetTop < 120) {
+      enemyHP -= 5;
       updateHP();
       bullet.remove();
-      clearInterval(move);
+      clearInterval(interval);
     }
 
-    if (pos > window.innerHeight) {
+    if (bullet.offsetTop < 0) {
       bullet.remove();
-      clearInterval(move);
+      clearInterval(interval);
     }
-  }, 20);
+
+  }, 16);
 }
 
-// ENEMY AI
+// ENEMY SHOOT
 setInterval(() => {
-  if (document.getElementById("gameOverlay").style.display === "block") {
-    enemyX += (Math.random() * 6 - 3);
-    document.getElementById("enemy").style.left = enemyX + "%";
+  if (!document.getElementById("game").style.display) return;
 
-    playerHP -= Math.random() * 3;
-    updateHP();
+  let b = document.createElement("div");
+  b.className = "bullet enemyBullet";
+  b.innerHTML = "•";
+  b.style.left = (window.innerWidth/2) + "px";
+  b.style.top = "100px";
 
-    if (enemyHP <= 0) alert("🎉 YOU WIN!");
-    if (playerHP <= 0) alert("💀 YOU LOST!");
-  }
-}, 800);
+  document.body.appendChild(b);
+
+  let i = setInterval(() => {
+    b.style.top = (b.offsetTop + 6) + "px";
+
+    if (Math.abs(b.offsetLeft - window.innerWidth/2) < 50 &&
+        b.offsetTop > window.innerHeight - 120) {
+      playerHP -= 5;
+      updateHP();
+      b.remove();
+      clearInterval(i);
+    }
+
+    if (b.offsetTop > window.innerHeight) {
+      b.remove();
+      clearInterval(i);
+    }
+
+  }, 16);
+
+}, 1200);
 
 function updateHP() {
-  document.getElementById("pHP").style.width = playerHP + "%";
-  document.getElementById("eHP").style.width = enemyHP + "%";
+  document.getElementById("playerBar").style.width = playerHP + "%";
+  document.getElementById("enemyBar").style.width = enemyHP + "%";
+
+  if (enemyHP <= 0) alert("🎉 YOU WIN!");
+  if (playerHP <= 0) alert("💀 YOU LOST!");
 }
 </script>
 
