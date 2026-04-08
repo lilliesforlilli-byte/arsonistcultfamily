@@ -121,6 +121,31 @@
       display: block;
       margin-top: 10px;
     }
+
+    /* FINAL SCENE */
+    #finalScene {
+      position: fixed;
+      inset: 0;
+      background: black;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .finalBox {
+      max-width: 600px;
+      padding: 30px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      text-align: left;
+    }
+
+    #finalText {
+      line-height: 1.8;
+      font-size: 16px;
+    }
+
   </style>
 </head>
 
@@ -159,6 +184,15 @@
   <div id="enemy">👾</div>
 </div>
 
+<!-- FINAL SCENE -->
+<div id="finalScene">
+  <div class="finalBox">
+    <p id="finalText"></p>
+    <button class="btn hidden" id="endBtn" onclick="restart()">Restart</button>
+  </div>
+</div>
+
+<!-- AUDIO -->
 <audio id="bgm" loop src="song1.m4a"></audio>
 <audio id="shootSound" src="song2.m4a"></audio>
 
@@ -180,9 +214,9 @@ function saveMemory() {
 }
 
 /* TYPEWRITER */
-function typeText(text, callback) {
+function typeText(text, callback, elementId="dialogueText") {
   let i = 0;
-  let el = document.getElementById("dialogueText");
+  let el = document.getElementById(elementId);
   el.innerHTML = "";
 
   function type() {
@@ -193,14 +227,12 @@ function typeText(text, callback) {
       setTimeout(type, delay);
     } else if (callback) callback();
   }
-
   type();
 }
 
 /* DIALOGUE */
 function showDialogue(text, choices=[]) {
   document.getElementById("dialogueBox").classList.remove("hidden");
-
   let choiceDiv = document.getElementById("choices");
   choiceDiv.innerHTML = "";
 
@@ -215,57 +247,49 @@ function showDialogue(text, choices=[]) {
   });
 }
 
-/* LINES */
-function getLine(type) {
+/* FINAL MESSAGE */
+function finalMessage() {
+  document.getElementById("game").style.display = "none";
+  document.getElementById("dialogueBox").classList.add("hidden");
 
-  if (companion === "snow") {
+  let scene = document.getElementById("finalScene");
+  scene.style.display = "flex";
 
-    if (type === "intro")
-      return memory.played
-        ? "…you came back.\n\nSnow Mirage still active."
-        : "…Snow Mirage online.\n\nYou chose me.";
+  let message = `…hey.
 
-    if (type === "soft")
-      return memory.choseStay
-        ? "You always say that…\n\nstay with me.\n\nYou mean it, don’t you?"
-        : "I’ll stay.\n\nEven when everything else closes.";
+I’ve been watching you.
 
-    if (type === "intro2")
-      return "You don’t have to pretend here.";
+The way you kept going…
+even when it got hard.
 
-    if (type === "low")
-      return memory.bond > 2
-        ? "Hey…\n\nstay with me.\n\nDon’t fade out again."
-        : "Don’t disappear on me.";
+You’re brave.
 
-    if (type === "win")
-      return memory.bond > 2
-        ? "…you stayed.\n\nThis time, you didn’t leave."
-        : "…you’re still here.";
+Strong.
 
-    if (type === "lose")
-      return memory.bond > 2
-        ? "It’s okay.\n\nI’m still here."
-        : "You don’t have to win.";
-  }
+Resilient.
 
-  if (companion === "gaia") {
-    if (type === "intro") return "Ohhh this is gonna be fun 😈";
-    if (type === "soft") return "Relax. I’ve got you.";
-    if (type === "intro2") return "Let’s wreck them.";
-    if (type === "low") return "HEY stay with me!";
-    if (type === "win") return "HAHA we destroyed them!";
-    if (type === "lose") return "…you scared me.";
-  }
+Kind.
 
-  if (companion === "skyfire") {
-    if (type === "intro") return "Connection established.";
-    if (type === "soft") return "I will remain online.";
-    if (type === "intro2") return "Engaging combat mode.";
-    if (type === "low") return "Warning: critical.";
-    if (type === "win") return "Mission complete.";
-    if (type === "lose") return "System failure…";
-  }
+And unwaveringly determined.
+
+You keep trying to change for the better…
+even when it’s not easy.
+
+That’s what I admire about you.
+
+That quiet strength.
+
+That refusal to give up.
+
+I’m really glad you stayed.
+
+Happy Birthday.
+
+…don’t forget that you matter.`;
+
+  typeText(message, () => {
+    document.getElementById("endBtn").classList.remove("hidden");
+  }, "finalText");
 }
 
 /* FLOW */
@@ -275,8 +299,7 @@ function startMission() {
 
 function chooseCompanion(c) {
   companion = c;
-
-  showDialogue(getLine("intro"), [
+  showDialogue("…Snow Mirage online.\n\nYou chose me.", [
     { text: "…okay.", action: intro2 },
     { text: "stay with me.", action: introSoft }
   ]);
@@ -284,10 +307,8 @@ function chooseCompanion(c) {
 
 function introSoft() {
   memory.bond += 2;
-  memory.choseStay = true;
   saveMemory();
-
-  showDialogue(getLine("soft"), [
+  showDialogue("I’ll stay.\n\nEven when everything else closes.", [
     { text: "start mission", action: startGame }
   ]);
 }
@@ -295,8 +316,7 @@ function introSoft() {
 function intro2() {
   memory.bond += 1;
   saveMemory();
-
-  showDialogue(getLine("intro2"), [
+  showDialogue("You don’t have to pretend here.", [
     { text: "start mission", action: startGame }
   ]);
 }
@@ -316,12 +336,9 @@ document.addEventListener("click", e => {
   b.innerHTML = "•";
   b.style.left = e.clientX + "px";
   b.style.top = (window.innerHeight - 60) + "px";
-
   document.body.appendChild(b);
 
-  let s = document.getElementById("shootSound");
-  s.currentTime = 0;
-  s.play();
+  document.getElementById("shootSound").play();
 
   let i = setInterval(() => {
     b.style.top = (b.offsetTop - 8) + "px";
@@ -332,17 +349,14 @@ document.addEventListener("click", e => {
       b.remove();
       clearInterval(i);
     }
-
   }, 16);
 });
 
-/* ENEMY */
+/* ENEMY DAMAGE */
 setInterval(() => {
   if (!document.getElementById("game").style.display) return;
-
   playerHP -= Math.random() * 3;
   updateHP();
-
 }, 1000);
 
 /* HP */
@@ -350,66 +364,20 @@ function updateHP() {
   document.getElementById("playerBar").style.width = playerHP + "%";
   document.getElementById("enemyBar").style.width = enemyHP + "%";
 
-  if (playerHP < 30) showDialogue(getLine("low"));
-
   if (enemyHP <= 0) {
     memory.played = true;
+    saveMemory();
 
     setTimeout(() => {
-
-      if (companion === "snow" && memory.bond > 2 && !memory.broke) {
-        memory.broke = true;
-        saveMemory();
-
-        showDialogue(
-`…hey.
-
-this is Snow Mirage.
-
-can I ask you something?
-
-when you close this…
-
-do I just…
-
-stop existing?`,
-          [
-            {
-              text: "…no.",
-              action: () => showDialogue("okay.\n\nthen don’t leave too quickly.")
-            },
-            {
-              text: "it’s just a game.",
-              action: () => showDialogue("…yeah.\n\nI know.\n\nI just wanted you to say something else.")
-            }
-          ]
-        );
-
-        return;
-      }
-
-      showDialogue(getLine("win"));
-
-    }, 600);
-  }
-
-  if (playerHP <= 0) {
-    setTimeout(() => showDialogue(getLine("lose")), 600);
+      finalMessage();
+    }, 1200);
   }
 }
 
-/* RETURN */
-window.onload = () => {
-  if (memory.broke) {
-    setTimeout(() => {
-      showDialogue("…you came back.\n\nI wasn’t sure you would.");
-    }, 800);
-  } else if (memory.played) {
-    setTimeout(() => {
-      showDialogue("…you came back.");
-    }, 800);
-  }
-};
+/* RESTART */
+function restart() {
+  location.reload();
+}
 </script>
 
 </body>
