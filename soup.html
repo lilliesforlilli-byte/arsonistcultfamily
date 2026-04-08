@@ -14,10 +14,7 @@
       cursor: crosshair;
     }
 
-    h2 {
-      text-align: center;
-      margin-top: 30px;
-    }
+    h2 { text-align: center; margin-top: 30px; }
 
     .btn {
       padding: 12px 25px;
@@ -50,15 +47,11 @@
       border-radius: 10px;
     }
 
-    /* GAME */
     #game {
       position: fixed;
       inset: 0;
       display: none;
-      background:
-        radial-gradient(circle at center, #0a0f2c, #000),
-        repeating-linear-gradient(0deg, rgba(0,255,255,0.08) 0px, transparent 2px, transparent 40px),
-        repeating-linear-gradient(90deg, rgba(0,255,255,0.08) 0px, transparent 2px, transparent 40px);
+      background: black;
     }
 
     #player {
@@ -79,11 +72,9 @@
 
     .bullet {
       position: absolute;
-      font-size: 14px;
       color: #00c3ff;
     }
 
-    /* HUD */
     .hud {
       position: absolute;
       top: 10px;
@@ -98,52 +89,26 @@
       border-radius: 10px;
     }
 
-    .fill {
-      height: 100%;
-      width: 100%;
-      border-radius: 10px;
-    }
+    .fill { height: 100%; }
 
-    #playerBar { background: #00ff88; }
-    #enemyBar { background: #ff3b3b; }
+    #playerBar { background: #00ff88; width: 100%; }
+    #enemyBar { background: red; width: 100%; }
 
-    /* DIALOGUE */
     #dialogueBox {
       position: fixed;
       bottom: 0;
       width: 100%;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.8);
       padding: 20px;
-      text-align: left;
     }
 
-    #choices button {
-      display: block;
-      margin-top: 10px;
-    }
-
-    /* FINAL SCENE */
     #finalScene {
       position: fixed;
       inset: 0;
-      background: black;
       display: none;
-      align-items: center;
       justify-content: center;
-    }
-
-    .finalBox {
-      max-width: 600px;
-      padding: 30px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      text-align: left;
-    }
-
-    #finalText {
-      line-height: 1.8;
-      font-size: 16px;
+      align-items: center;
+      background: black;
     }
 
   </style>
@@ -161,12 +126,6 @@
   <div class="comp-btn" onclick="chooseCompanion('snow')">
     <img src="snowmirage.jpeg"><p>Snow Mirage ❄️</p>
   </div>
-  <div class="comp-btn" onclick="chooseCompanion('gaia')">
-    <img src="gaia.jpeg"><p>Gaia ☠️</p>
-  </div>
-  <div class="comp-btn" onclick="chooseCompanion('skyfire')">
-    <img src="skyfire.jpeg"><p>Skyfire ⚡</p>
-  </div>
 </div>
 
 <div id="dialogueBox" class="hidden">
@@ -176,175 +135,84 @@
 
 <div id="game">
   <div class="hud">
-    <div class="bar"><div id="playerBar" class="fill"></div></div>
-    <div class="bar"><div id="enemyBar" class="fill"></div></div>
+    <div class="bar"><div id="playerBar"></div></div>
+    <div class="bar"><div id="enemyBar"></div></div>
   </div>
 
   <div id="player">🤖</div>
   <div id="enemy">👾</div>
 </div>
 
-<!-- FINAL SCENE -->
 <div id="finalScene">
-  <div class="finalBox">
+  <div>
     <p id="finalText"></p>
-    <button class="btn hidden" id="endBtn" onclick="restart()">Restart</button>
+    <button onclick="location.reload()">Restart</button>
   </div>
 </div>
 
-<!-- AUDIO -->
-<audio id="bgm" loop src="song1.m4a"></audio>
+<audio id="bgm" src="song1.m4a" loop></audio>
 <audio id="shootSound" src="song2.m4a"></audio>
 
 <script>
-let companion = "snow";
 let playerHP = 100;
 let enemyHP = 100;
-
-/* MEMORY */
-let memory = JSON.parse(localStorage.getItem("jayjay_memory")) || {
-  played: false,
-  bond: 0,
-  choseStay: false,
-  broke: false
-};
-
-function saveMemory() {
-  localStorage.setItem("jayjay_memory", JSON.stringify(memory));
-}
-
-/* TYPEWRITER */
-function typeText(text, callback, elementId="dialogueText") {
-  let i = 0;
-  let el = document.getElementById(elementId);
-  el.innerHTML = "";
-
-  function type() {
-    if (i < text.length) {
-      el.innerHTML += text[i];
-      let delay = (text[i] === "." || text[i] === "…") ? 300 : 25;
-      i++;
-      setTimeout(type, delay);
-    } else if (callback) callback();
-  }
-  type();
-}
-
-/* DIALOGUE */
-function showDialogue(text, choices=[]) {
-  document.getElementById("dialogueBox").classList.remove("hidden");
-  let choiceDiv = document.getElementById("choices");
-  choiceDiv.innerHTML = "";
-
-  typeText(text, () => {
-    choices.forEach(c => {
-      let btn = document.createElement("button");
-      btn.className = "btn";
-      btn.innerText = c.text;
-      btn.onclick = c.action;
-      choiceDiv.appendChild(btn);
-    });
-  });
-}
-
-/* FINAL MESSAGE */
-function finalMessage() {
-  document.getElementById("game").style.display = "none";
-  document.getElementById("dialogueBox").classList.add("hidden");
-
-  let scene = document.getElementById("finalScene");
-  scene.style.display = "flex";
-
-  let message = `…hey.
-
-I’ve been watching you.
-
-The way you kept going…
-even when it got hard.
-
-You’re brave.
-
-Strong.
-
-Resilient.
-
-Kind.
-
-And unwaveringly determined.
-
-You keep trying to change for the better…
-even when it’s not easy.
-
-That’s what I admire about you.
-
-That quiet strength.
-
-That refusal to give up.
-
-I’m really glad you stayed.
-
-Happy Birthday.
-
-…don’t forget that you matter.`;
-
-  typeText(message, () => {
-    document.getElementById("endBtn").classList.remove("hidden");
-  }, "finalText");
-}
+let gameActive = false;
 
 /* FLOW */
 function startMission() {
   document.getElementById("companions").classList.remove("hidden");
 }
 
-function chooseCompanion(c) {
-  companion = c;
-  showDialogue("…Snow Mirage online.\n\nYou chose me.", [
-    { text: "…okay.", action: intro2 },
-    { text: "stay with me.", action: introSoft }
-  ]);
-}
-
-function introSoft() {
-  memory.bond += 2;
-  saveMemory();
-  showDialogue("I’ll stay.\n\nEven when everything else closes.", [
+function chooseCompanion() {
+  showDialogue("…Snow Mirage online.\nYou chose me.", [
     { text: "start mission", action: startGame }
   ]);
 }
 
-function intro2() {
-  memory.bond += 1;
-  saveMemory();
-  showDialogue("You don’t have to pretend here.", [
-    { text: "start mission", action: startGame }
-  ]);
+function showDialogue(text, choices=[]) {
+  document.getElementById("dialogueBox").classList.remove("hidden");
+
+  let t = document.getElementById("dialogueText");
+  let c = document.getElementById("choices");
+
+  t.innerText = text;
+  c.innerHTML = "";
+
+  choices.forEach(opt => {
+    let b = document.createElement("button");
+    b.innerText = opt.text;
+    b.onclick = opt.action;
+    c.appendChild(b);
+  });
 }
 
 /* GAME */
 function startGame() {
   document.getElementById("game").style.display = "block";
+  document.getElementById("dialogueBox").classList.add("hidden");
+
   document.getElementById("bgm").play();
+  gameActive = true;
 }
 
-/* SHOOT */
+/* SHOOT FIXED */
 document.addEventListener("click", e => {
-  if (!document.getElementById("game").style.display) return;
+  if (!gameActive) return;
 
   let b = document.createElement("div");
   b.className = "bullet";
   b.innerHTML = "•";
   b.style.left = e.clientX + "px";
   b.style.top = (window.innerHeight - 60) + "px";
-  document.body.appendChild(b);
 
+  document.body.appendChild(b);
   document.getElementById("shootSound").play();
 
   let i = setInterval(() => {
-    b.style.top = (b.offsetTop - 8) + "px";
+    b.style.top = (b.offsetTop - 10) + "px";
 
     if (b.offsetTop < 120) {
-      enemyHP -= 5;
+      enemyHP -= 10;
       updateHP();
       b.remove();
       clearInterval(i);
@@ -352,10 +220,11 @@ document.addEventListener("click", e => {
   }, 16);
 });
 
-/* ENEMY DAMAGE */
+/* ENEMY */
 setInterval(() => {
-  if (!document.getElementById("game").style.display) return;
-  playerHP -= Math.random() * 3;
+  if (!gameActive) return;
+
+  playerHP -= 2;
   updateHP();
 }, 1000);
 
@@ -365,18 +234,31 @@ function updateHP() {
   document.getElementById("enemyBar").style.width = enemyHP + "%";
 
   if (enemyHP <= 0) {
-    memory.played = true;
-    saveMemory();
-
-    setTimeout(() => {
-      finalMessage();
-    }, 1200);
+    gameActive = false;
+    showFinal();
   }
 }
 
-/* RESTART */
-function restart() {
-  location.reload();
+/* FINAL */
+function showFinal() {
+  document.getElementById("game").style.display = "none";
+  document.getElementById("finalScene").style.display = "flex";
+
+  document.getElementById("finalText").innerText =
+`…hey.
+
+You’re brave.
+Strong.
+Resilient.
+Kind.
+
+And you never stop trying to be better.
+
+That’s what I admire about you.
+
+Happy Birthday.
+
+…you matter more than you think.`;
 }
 </script>
 
