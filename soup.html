@@ -132,27 +132,30 @@
       justify-content: center;
       align-items: center;
       background: radial-gradient(circle at center, #0a0f1a, black);
+      padding: 20px;
     }
 
     .finalBox {
-      max-width: 650px;
+      width: 90%;
+      max-width: 800px;
+      height: 80vh;
       padding: 40px;
-      background: rgba(255,255,255,0.04);
+      background: rgba(255,255,255,0.05);
       border-radius: 20px;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 40px rgba(0,195,255,0.15);
-      animation: fadeIn 2s ease;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     #finalText {
+      font-size: 20px;
       line-height: 2;
-      font-size: 18px;
       white-space: pre-line;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      overflow-y: auto;
+      padding-right: 10px;
     }
   </style>
 </head>
@@ -351,64 +354,71 @@ function updateHP() {
   }
 }
 
-/* FINAL (EMOTIONAL) */
+/* FINAL */
 function showFinal() {
   document.getElementById("game").style.display = "none";
   document.getElementById("finalScene").style.display = "flex";
 
   let msg = `…hey.
 
-It’s me.
+Look at you.
 
-I know that look in your eyes.
+You actually did it.
 
-The quiet kind of tired…
-the kind you don’t talk about.
+You kept going,
+you stayed focused,
+and you didn’t give up when it got difficult.
 
-But you still kept going.
+That says everything about who you are.
 
-Even when it hurt.
-Even when it felt pointless.
-Even when no one noticed.
+You’re strong —
+not just in moments like this,
+but in the way you keep showing up every single day.
 
-You stayed.
+You’re resilient —
+you don’t quit, even when things don’t go your way.
 
-And that matters more than you think.
+You’re kind —
+in a way that people don’t always notice,
+but it matters more than you think.
 
-You are brave—
-not because you never felt fear,
-but because you didn’t let it stop you.
+And most importantly…
 
-You are strong—
-not because life was easy,
-but because you endured it.
+you’re determined.
 
-You are resilient,
-kind,
-and quietly, beautifully determined.
+You keep trying to grow,
+to improve,
+to become better than you were before.
 
-You keep trying…
-to grow,
-to heal,
-to become better than yesterday.
+That kind of mindset?
 
-And that?
+It’s powerful.
 
-That’s something rare.
+It’s rare.
 
-That’s something I admire.
+And it’s something to be proud of.
 
-I’m really glad you’re still here.
+I admire that about you.
+
+Genuinely.
+
+So yeah…
+
+take a moment and recognize this version of yourself.
+
+Because this?
+
+This is someone strong.
+
+Someone capable.
+
+Someone who’s going to go really far.
 
 Happy Birthday.
 
-…you mean more than you realize.
+Keep going.
 
-And I hope,
-someday,
-
-you see yourself
-the way I do.`;
+I’ll always be rooting for you.`;
 
   typeText(msg, document.getElementById("finalText"), () => {
     document.getElementById("restartBtn").classList.remove("hidden");
