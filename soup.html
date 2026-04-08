@@ -14,7 +14,10 @@
       cursor: crosshair;
     }
 
-    h2 { text-align: center; margin-top: 30px; }
+    h2 {
+      text-align: center;
+      margin-top: 30px;
+    }
 
     .btn {
       padding: 12px 25px;
@@ -35,11 +38,18 @@
     }
 
     .comp-btn {
-      width: 140px;
+      width: 160px;
       background: rgba(255,255,255,0.05);
       border-radius: 10px;
       padding: 10px;
       cursor: pointer;
+      text-align: center;
+      transition: 0.3s;
+    }
+
+    .comp-btn:hover {
+      transform: scale(1.05);
+      background: rgba(255,255,255,0.1);
     }
 
     .comp-btn img {
@@ -47,6 +57,7 @@
       border-radius: 10px;
     }
 
+    /* GAME */
     #game {
       position: fixed;
       inset: 0;
@@ -73,8 +84,10 @@
     .bullet {
       position: absolute;
       color: #00c3ff;
+      font-size: 18px;
     }
 
+    /* HUD */
     .hud {
       position: absolute;
       top: 10px;
@@ -89,19 +102,29 @@
       border-radius: 10px;
     }
 
-    .fill { height: 100%; }
+    .fill {
+      height: 100%;
+      border-radius: 10px;
+    }
 
     #playerBar { background: #00ff88; width: 100%; }
     #enemyBar { background: red; width: 100%; }
 
+    /* DIALOGUE */
     #dialogueBox {
       position: fixed;
       bottom: 0;
       width: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       padding: 20px;
     }
 
+    #choices button {
+      display: block;
+      margin-top: 10px;
+    }
+
+    /* FINAL */
     #finalScene {
       position: fixed;
       inset: 0;
@@ -111,6 +134,16 @@
       background: black;
     }
 
+    .finalBox {
+      max-width: 600px;
+      padding: 30px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 15px;
+    }
+
+    #finalText {
+      line-height: 1.8;
+    }
   </style>
 </head>
 
@@ -119,34 +152,51 @@
 <h2>🎮 Mission: Jayjay</h2>
 
 <div style="text-align:center">
-  <button class="btn" onclick="startMission()">Start</button>
+  <button class="btn" onclick="startMission()">Start Mission</button>
 </div>
 
+<!-- COMPANIONS -->
 <div id="companions" class="companions hidden">
+
   <div class="comp-btn" onclick="chooseCompanion('snow')">
-    <img src="snowmirage.jpeg"><p>Snow Mirage ❄️</p>
+    <img src="snowmirage.jpeg">
+    <p>Snow Mirage ❄️</p>
   </div>
+
+  <div class="comp-btn" onclick="chooseCompanion('skyfire')">
+    <img src="skyfire.jpeg">
+    <p>Skyfire 🔥</p>
+  </div>
+
+  <div class="comp-btn" onclick="chooseCompanion('gaia')">
+    <img src="gaia.jpeg">
+    <p>Gaia 🌿</p>
+  </div>
+
 </div>
 
+<!-- DIALOGUE -->
 <div id="dialogueBox" class="hidden">
   <p id="dialogueText"></p>
   <div id="choices"></div>
 </div>
 
+<!-- GAME -->
 <div id="game">
   <div class="hud">
-    <div class="bar"><div id="playerBar"></div></div>
-    <div class="bar"><div id="enemyBar"></div></div>
+    <div class="bar"><div id="playerBar" class="fill"></div></div>
+    <div class="bar"><div id="enemyBar" class="fill"></div></div>
   </div>
 
   <div id="player">🤖</div>
   <div id="enemy">👾</div>
 </div>
 
+<!-- FINAL -->
 <div id="finalScene">
-  <div>
+  <div class="finalBox">
     <p id="finalText"></p>
-    <button onclick="location.reload()">Restart</button>
+    <button class="btn hidden" id="restartBtn" onclick="location.reload()">Restart</button>
   </div>
 </div>
 
@@ -157,45 +207,89 @@
 let playerHP = 100;
 let enemyHP = 100;
 let gameActive = false;
+let typingTimeout;
+
+/* TYPEWRITER FIXED */
+function typeText(text, element, callback) {
+  let i = 0;
+  element.innerHTML = "";
+  clearTimeout(typingTimeout);
+
+  function type() {
+    if (i < text.length) {
+      let char = text[i];
+
+      if (char === "\n") {
+        element.innerHTML += "<br>";
+      } else {
+        element.innerHTML += char;
+      }
+
+      let delay = (char === "." || char === "…") ? 200 : 18;
+      i++;
+      typingTimeout = setTimeout(type, delay);
+    } else if (callback) {
+      callback();
+    }
+  }
+
+  type();
+}
+
+/* DIALOGUE */
+function showDialogue(text, choices=[]) {
+  const box = document.getElementById("dialogueBox");
+  const textEl = document.getElementById("dialogueText");
+  const choiceDiv = document.getElementById("choices");
+
+  box.classList.remove("hidden");
+  choiceDiv.innerHTML = "";
+
+  typeText(text, textEl, () => {
+    choices.forEach(opt => {
+      let btn = document.createElement("button");
+      btn.className = "btn";
+      btn.innerText = opt.text;
+      btn.onclick = opt.action;
+      choiceDiv.appendChild(btn);
+    });
+  });
+}
 
 /* FLOW */
 function startMission() {
   document.getElementById("companions").classList.remove("hidden");
 }
 
-function chooseCompanion() {
-  showDialogue("…Snow Mirage online.\nYou chose me.", [
-    { text: "start mission", action: startGame }
+/* COMPANIONS */
+function chooseCompanion(name) {
+  let text = "";
+
+  if (name === "snow") {
+    text = "…Snow Mirage online.\n\nSilent. Cold. Watching.\n\nYou chose me.";
+  } 
+  else if (name === "skyfire") {
+    text = "…Skyfire ignited.\n\nWe burn through anything in our way.\n\nLet’s move.";
+  } 
+  else if (name === "gaia") {
+    text = "…Gaia awakened.\n\nThe earth stands with you.\n\nYou are not alone.";
+  }
+
+  showDialogue(text, [
+    { text: "Start Mission", action: startGame }
   ]);
 }
 
-function showDialogue(text, choices=[]) {
-  document.getElementById("dialogueBox").classList.remove("hidden");
-
-  let t = document.getElementById("dialogueText");
-  let c = document.getElementById("choices");
-
-  t.innerText = text;
-  c.innerHTML = "";
-
-  choices.forEach(opt => {
-    let b = document.createElement("button");
-    b.innerText = opt.text;
-    b.onclick = opt.action;
-    c.appendChild(b);
-  });
-}
-
-/* GAME */
+/* GAME START */
 function startGame() {
   document.getElementById("game").style.display = "block";
   document.getElementById("dialogueBox").classList.add("hidden");
-
   document.getElementById("bgm").play();
+
   gameActive = true;
 }
 
-/* SHOOT FIXED */
+/* SHOOT */
 document.addEventListener("click", e => {
   if (!gameActive) return;
 
@@ -206,7 +300,10 @@ document.addEventListener("click", e => {
   b.style.top = (window.innerHeight - 60) + "px";
 
   document.body.appendChild(b);
-  document.getElementById("shootSound").play();
+
+  let sound = document.getElementById("shootSound");
+  sound.currentTime = 0;
+  sound.play();
 
   let i = setInterval(() => {
     b.style.top = (b.offsetTop - 10) + "px";
@@ -217,10 +314,15 @@ document.addEventListener("click", e => {
       b.remove();
       clearInterval(i);
     }
+
+    if (b.offsetTop < 0) {
+      b.remove();
+      clearInterval(i);
+    }
   }, 16);
 });
 
-/* ENEMY */
+/* ENEMY DAMAGE */
 setInterval(() => {
   if (!gameActive) return;
 
@@ -235,7 +337,7 @@ function updateHP() {
 
   if (enemyHP <= 0) {
     gameActive = false;
-    showFinal();
+    setTimeout(showFinal, 800);
   }
 }
 
@@ -244,21 +346,36 @@ function showFinal() {
   document.getElementById("game").style.display = "none";
   document.getElementById("finalScene").style.display = "flex";
 
-  document.getElementById("finalText").innerText =
-`…hey.
+  let msg = `…hey.
+
+I’ve been watching you.
+
+The way you kept going…
+even when it got hard.
 
 You’re brave.
+
 Strong.
+
 Resilient.
+
 Kind.
 
-And you never stop trying to be better.
+And unwaveringly determined.
 
-That’s what I admire about you.
+You keep trying to change for the better…
+
+And that’s what I admire about you.
+
+I’m really glad you stayed.
 
 Happy Birthday.
 
 …you matter more than you think.`;
+
+  typeText(msg, document.getElementById("finalText"), () => {
+    document.getElementById("restartBtn").classList.remove("hidden");
+  });
 }
 </script>
 
