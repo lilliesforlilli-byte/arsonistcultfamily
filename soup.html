@@ -209,7 +209,7 @@
 <div id="finalScene">
   <div class="finalBox">
     <p id="finalText"></p>
-    <button class="btn hidden" id="restartBtn" onclick="location.reload()">Restart</button>
+    <button class="btn hidden" id="celebrateBtn" onclick="rickroll()">Continue Birthday Celebration 🎉</button>
   </div>
 </div>
 
@@ -415,8 +415,13 @@ Keep going.
 I’ll always be rooting for you.`;
 
   typeText(msg, document.getElementById("finalText"), () => {
-    document.getElementById("restartBtn").classList.remove("hidden");
+    document.getElementById("celebrateBtn").classList.remove("hidden");
   });
+}
+
+/* RICKROLL */
+function rickroll() {
+  window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 }
 </script>
 
