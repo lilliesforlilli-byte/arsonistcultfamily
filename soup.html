@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
@@ -68,23 +69,19 @@
     #player {
       position: absolute;
       bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
       font-size: 45px;
     }
 
     #enemy {
       position: absolute;
       top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
       font-size: 55px;
     }
 
     .bullet {
       position: absolute;
-      color: #00c3ff;
       font-size: 18px;
+      color: #00c3ff;
     }
 
     /* HUD */
@@ -124,7 +121,7 @@
       margin-top: 10px;
     }
 
-    /* FINAL SCENE */
+    /* FINAL */
     #finalScene {
       position: fixed;
       inset: 0;
@@ -155,7 +152,6 @@
       line-height: 2;
       white-space: pre-line;
       overflow-y: auto;
-      padding-right: 10px;
     }
   </style>
 </head>
@@ -171,17 +167,17 @@
 <!-- COMPANIONS -->
 <div id="companions" class="companions hidden">
 
-  <div class="comp-btn" onclick="chooseCompanion('snow')">
+  <div class="comp-btn" onclick="chooseCompanion()">
     <img src="snowmirage.jpeg">
     <p>Snow Mirage ❄️</p>
   </div>
 
-  <div class="comp-btn" onclick="chooseCompanion('skyfire')">
+  <div class="comp-btn" onclick="chooseCompanion()">
     <img src="skyfire.jpeg">
     <p>Skyfire 🔥</p>
   </div>
 
-  <div class="comp-btn" onclick="chooseCompanion('gaia')">
+  <div class="comp-btn" onclick="chooseCompanion()">
     <img src="gaia.jpeg">
     <p>Gaia 🌿</p>
   </div>
@@ -220,32 +216,25 @@
 let playerHP = 100;
 let enemyHP = 100;
 let gameActive = false;
-let typingTimeout;
+
+let playerX = window.innerWidth / 2;
+let enemyX = window.innerWidth / 2;
+
+let keys = {};
 
 /* TYPEWRITER */
 function typeText(text, element, callback) {
   let i = 0;
   element.innerHTML = "";
-  clearTimeout(typingTimeout);
 
   function type() {
     if (i < text.length) {
       let char = text[i];
-
-      if (char === "\n") {
-        element.innerHTML += "<br>";
-      } else {
-        element.innerHTML += char;
-      }
-
-      let delay = (char === "." || char === "…") ? 200 : 18;
+      element.innerHTML += char === "\n" ? "<br>" : char;
       i++;
-      typingTimeout = setTimeout(type, delay);
-    } else if (callback) {
-      callback();
-    }
+      setTimeout(type, 15);
+    } else if (callback) callback();
   }
-
   type();
 }
 
@@ -269,60 +258,52 @@ function showDialogue(text, choices=[]) {
   });
 }
 
-/* FLOW */
 function startMission() {
   document.getElementById("companions").classList.remove("hidden");
 }
 
-/* COMPANIONS */
-function chooseCompanion(name) {
-  let text = "";
-
-  if (name === "snow") {
-    text = "…Snow Mirage online.\n\nSilent. Cold. Watching.\n\nYou chose me.";
-  } 
-  else if (name === "skyfire") {
-    text = "…Skyfire ignited.\n\nWe burn through anything in our way.\n\nLet’s move.";
-  } 
-  else if (name === "gaia") {
-    text = "…Gaia awakened.\n\nThe earth stands with you.\n\nYou are not alone.";
-  }
-
-  showDialogue(text, [
+function chooseCompanion() {
+  showDialogue("Your companion is ready.", [
     { text: "Start Mission", action: startGame }
   ]);
 }
 
-/* GAME */
+/* GAME START */
 function startGame() {
   document.getElementById("game").style.display = "block";
   document.getElementById("dialogueBox").classList.add("hidden");
   document.getElementById("bgm").play();
 
   gameActive = true;
+  gameLoop();
+  enemyShootLoop();
 }
 
-/* SHOOT */
-document.addEventListener("click", e => {
-  if (!gameActive) return;
+/* INPUT */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
+/* SHOOT */
+document.addEventListener("keydown", e => {
+  if (e.key === " " && gameActive) shootBullet();
+});
+
+function shootBullet() {
   let b = document.createElement("div");
   b.className = "bullet";
   b.innerHTML = "•";
-  b.style.left = e.clientX + "px";
-  b.style.top = (window.innerHeight - 60) + "px";
+
+  b.style.left = playerX + "px";
+  b.style.top = (window.innerHeight - 80) + "px";
 
   document.body.appendChild(b);
-
-  let sound = document.getElementById("shootSound");
-  sound.currentTime = 0;
-  sound.play();
+  document.getElementById("shootSound").play();
 
   let i = setInterval(() => {
-    b.style.top = (b.offsetTop - 10) + "px";
+    b.style.top = (b.offsetTop - 12) + "px";
 
-    if (b.offsetTop < 120) {
-      enemyHP -= 10;
+    if (hitEnemy(b)) {
+      enemyHP -= 8;
       updateHP();
       b.remove();
       clearInterval(i);
@@ -333,15 +314,72 @@ document.addEventListener("click", e => {
       clearInterval(i);
     }
   }, 16);
-});
+}
 
-/* ENEMY DAMAGE */
-setInterval(() => {
+/* ENEMY SHOOT */
+function enemyShootLoop() {
+  setInterval(() => {
+    if (!gameActive) return;
+
+    let b = document.createElement("div");
+    b.className = "bullet";
+    b.style.color = "red";
+    b.innerHTML = "•";
+
+    b.style.left = enemyX + "px";
+    b.style.top = "120px";
+
+    document.body.appendChild(b);
+
+    let i = setInterval(() => {
+      b.style.top = (b.offsetTop + 8) + "px";
+
+      if (hitPlayer(b)) {
+        playerHP -= 10;
+        updateHP();
+        b.remove();
+        clearInterval(i);
+      }
+
+      if (b.offsetTop > window.innerHeight) {
+        b.remove();
+        clearInterval(i);
+      }
+    }, 16);
+  }, 1200);
+}
+
+/* GAME LOOP */
+function gameLoop() {
   if (!gameActive) return;
 
-  playerHP -= 2;
-  updateHP();
-}, 1000);
+  let player = document.getElementById("player");
+  let enemy = document.getElementById("enemy");
+
+  if (keys["ArrowLeft"] || keys["a"]) playerX -= 6;
+  if (keys["ArrowRight"] || keys["d"]) playerX += 6;
+
+  playerX = Math.max(20, Math.min(window.innerWidth - 20, playerX));
+  player.style.left = playerX + "px";
+
+  enemyX += Math.sin(Date.now() / 500) * 2;
+  enemy.style.left = enemyX + "px";
+
+  requestAnimationFrame(gameLoop);
+}
+
+/* COLLISIONS */
+function hitEnemy(b) {
+  let e = document.getElementById("enemy");
+  return Math.abs(b.offsetLeft - e.offsetLeft) < 30 &&
+         Math.abs(b.offsetTop - e.offsetTop) < 30;
+}
+
+function hitPlayer(b) {
+  let p = document.getElementById("player");
+  return Math.abs(b.offsetLeft - p.offsetLeft) < 30 &&
+         Math.abs(b.offsetTop - p.offsetTop) < 30;
+}
 
 /* HP */
 function updateHP() {
@@ -351,6 +389,12 @@ function updateHP() {
   if (enemyHP <= 0) {
     gameActive = false;
     setTimeout(showFinal, 800);
+  }
+
+  if (playerHP <= 0) {
+    gameActive = false;
+    alert("You lost 😭");
+    location.reload();
   }
 }
 
@@ -365,61 +409,26 @@ Look at you.
 
 You actually did it.
 
-You kept going,
-you stayed focused,
-and you didn’t give up when it got difficult.
+You fought for it.
 
-That says everything about who you are.
+And that says everything.
 
-You’re strong —
-not just in moments like this,
-but in the way you keep showing up every single day.
-
-You’re resilient —
-you don’t quit, even when things don’t go your way.
-
-You’re kind —
-in a way that people don’t always notice,
-but it matters more than you think.
-
-And most importantly…
-
-you’re determined.
-
-You keep trying to grow,
-to improve,
-to become better than you were before.
-
-And it’s something to be proud of.
+You’re strong.
+You’re resilient.
+You don’t quit.
 
 I admire that about you.
-
-Genuinely.
-
-So yeah…
-
-take a moment and recognize this version of yourself.
-
-Because this?
-
-This is someone strong.
-
-Someone capable.
-
-Someone who’s going to go really far.
 
 Happy Birthday.
 
 Keep going.
-
-I’ll always be rooting for you.`;
+Always.`;
 
   typeText(msg, document.getElementById("finalText"), () => {
     document.getElementById("celebrateBtn").classList.remove("hidden");
   });
 }
 
-/* RICKROLL */
 function rickroll() {
   window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
 }
@@ -427,3 +436,4 @@ function rickroll() {
 
 </body>
 </html>
+```
