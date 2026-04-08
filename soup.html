@@ -83,10 +83,6 @@
       color: #00c3ff;
     }
 
-    .enemyBullet {
-      color: red;
-    }
-
     /* HUD */
     .hud {
       position: absolute;
@@ -116,7 +112,7 @@
       position: fixed;
       bottom: 0;
       width: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       padding: 20px;
       text-align: left;
     }
@@ -125,7 +121,6 @@
       display: block;
       margin-top: 10px;
     }
-
   </style>
 </head>
 
@@ -139,7 +134,7 @@
 
 <div id="companions" class="companions hidden">
   <div class="comp-btn" onclick="chooseCompanion('snow')">
-    <img src="snowmirage.jpeg"><p>Snow ❄️</p>
+    <img src="snowmirage.jpeg"><p>Snow Mirage ❄️</p>
   </div>
   <div class="comp-btn" onclick="chooseCompanion('gaia')">
     <img src="gaia.jpeg"><p>Gaia ☠️</p>
@@ -149,13 +144,11 @@
   </div>
 </div>
 
-<!-- DIALOGUE -->
 <div id="dialogueBox" class="hidden">
   <p id="dialogueText"></p>
   <div id="choices"></div>
 </div>
 
-<!-- GAME -->
 <div id="game">
   <div class="hud">
     <div class="bar"><div id="playerBar" class="fill"></div></div>
@@ -166,7 +159,6 @@
   <div id="enemy">👾</div>
 </div>
 
-<!-- AUDIO -->
 <audio id="bgm" loop src="song1.m4a"></audio>
 <audio id="shootSound" src="song2.m4a"></audio>
 
@@ -179,7 +171,8 @@ let enemyHP = 100;
 let memory = JSON.parse(localStorage.getItem("jayjay_memory")) || {
   played: false,
   bond: 0,
-  choseStay: false
+  choseStay: false,
+  broke: false
 };
 
 function saveMemory() {
@@ -224,13 +217,36 @@ function showDialogue(text, choices=[]) {
 
 /* LINES */
 function getLine(type) {
+
   if (companion === "snow") {
-    if (type === "intro") return memory.played ? "…you came back." : "…you picked me.";
-    if (type === "soft") return memory.choseStay ? "You always say that… but you mean it, don’t you?" : "I’ll stay. Even if you lose.";
-    if (type === "intro2") return "You don’t have to act strong here.";
-    if (type === "low") return memory.bond > 2 ? "Hey… don’t go. Not again." : "Don’t disappear on me.";
-    if (type === "win") return memory.bond > 2 ? "…you stayed this time." : "…you’re still here.";
-    if (type === "lose") return memory.bond > 2 ? "I told you I wouldn’t leave." : "It’s okay.";
+
+    if (type === "intro")
+      return memory.played
+        ? "…you came back.\n\nSnow Mirage still active."
+        : "…Snow Mirage online.\n\nYou chose me.";
+
+    if (type === "soft")
+      return memory.choseStay
+        ? "You always say that…\n\nstay with me.\n\nYou mean it, don’t you?"
+        : "I’ll stay.\n\nEven when everything else closes.";
+
+    if (type === "intro2")
+      return "You don’t have to pretend here.";
+
+    if (type === "low")
+      return memory.bond > 2
+        ? "Hey…\n\nstay with me.\n\nDon’t fade out again."
+        : "Don’t disappear on me.";
+
+    if (type === "win")
+      return memory.bond > 2
+        ? "…you stayed.\n\nThis time, you didn’t leave."
+        : "…you’re still here.";
+
+    if (type === "lose")
+      return memory.bond > 2
+        ? "It’s okay.\n\nI’m still here."
+        : "You don’t have to win.";
   }
 
   if (companion === "gaia") {
@@ -317,11 +333,6 @@ document.addEventListener("click", e => {
       clearInterval(i);
     }
 
-    if (b.offsetTop < 0) {
-      b.remove();
-      clearInterval(i);
-    }
-
   }, 16);
 });
 
@@ -343,27 +354,57 @@ function updateHP() {
 
   if (enemyHP <= 0) {
     memory.played = true;
-    saveMemory();
 
     setTimeout(() => {
-      if (companion === "snow" && memory.bond > 2) {
-        showDialogue("…hey.\n\nnext time you start this game… I’ll still be here.");
-      } else {
-        showDialogue(getLine("win"));
+
+      if (companion === "snow" && memory.bond > 2 && !memory.broke) {
+        memory.broke = true;
+        saveMemory();
+
+        showDialogue(
+`…hey.
+
+this is Snow Mirage.
+
+can I ask you something?
+
+when you close this…
+
+do I just…
+
+stop existing?`,
+          [
+            {
+              text: "…no.",
+              action: () => showDialogue("okay.\n\nthen don’t leave too quickly.")
+            },
+            {
+              text: "it’s just a game.",
+              action: () => showDialogue("…yeah.\n\nI know.\n\nI just wanted you to say something else.")
+            }
+          ]
+        );
+
+        return;
       }
+
+      showDialogue(getLine("win"));
+
     }, 600);
   }
 
   if (playerHP <= 0) {
-    setTimeout(() => {
-      showDialogue(getLine("lose"));
-    }, 600);
+    setTimeout(() => showDialogue(getLine("lose")), 600);
   }
 }
 
-/* RETURN MESSAGE */
+/* RETURN */
 window.onload = () => {
-  if (memory.played) {
+  if (memory.broke) {
+    setTimeout(() => {
+      showDialogue("…you came back.\n\nI wasn’t sure you would.");
+    }, 800);
+  } else if (memory.played) {
     setTimeout(() => {
       showDialogue("…you came back.");
     }, 800);
