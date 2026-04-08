@@ -124,25 +124,35 @@
       margin-top: 10px;
     }
 
-    /* FINAL */
+    /* FINAL SCENE */
     #finalScene {
       position: fixed;
       inset: 0;
       display: none;
       justify-content: center;
       align-items: center;
-      background: black;
+      background: radial-gradient(circle at center, #0a0f1a, black);
     }
 
     .finalBox {
-      max-width: 600px;
-      padding: 30px;
-      background: rgba(255,255,255,0.05);
-      border-radius: 15px;
+      max-width: 650px;
+      padding: 40px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 40px rgba(0,195,255,0.15);
+      animation: fadeIn 2s ease;
     }
 
     #finalText {
-      line-height: 1.8;
+      line-height: 2;
+      font-size: 18px;
+      white-space: pre-line;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
@@ -209,7 +219,7 @@ let enemyHP = 100;
 let gameActive = false;
 let typingTimeout;
 
-/* TYPEWRITER FIXED */
+/* TYPEWRITER */
 function typeText(text, element, callback) {
   let i = 0;
   element.innerHTML = "";
@@ -280,7 +290,7 @@ function chooseCompanion(name) {
   ]);
 }
 
-/* GAME START */
+/* GAME */
 function startGame() {
   document.getElementById("game").style.display = "block";
   document.getElementById("dialogueBox").classList.add("hidden");
@@ -341,37 +351,64 @@ function updateHP() {
   }
 }
 
-/* FINAL */
+/* FINAL (EMOTIONAL) */
 function showFinal() {
   document.getElementById("game").style.display = "none";
   document.getElementById("finalScene").style.display = "flex";
 
   let msg = `…hey.
 
-I’ve been watching you.
+It’s me.
 
-The way you kept going…
-even when it got hard.
+I know that look in your eyes.
 
-You’re brave.
+The quiet kind of tired…
+the kind you don’t talk about.
 
-Strong.
+But you still kept going.
 
-Resilient.
+Even when it hurt.
+Even when it felt pointless.
+Even when no one noticed.
 
-Kind.
+You stayed.
 
-And unwaveringly determined.
+And that matters more than you think.
 
-You keep trying to change for the better…
+You are brave—
+not because you never felt fear,
+but because you didn’t let it stop you.
 
-And that’s what I admire about you.
+You are strong—
+not because life was easy,
+but because you endured it.
 
-I’m really glad you stayed.
+You are resilient,
+kind,
+and quietly, beautifully determined.
+
+You keep trying…
+to grow,
+to heal,
+to become better than yesterday.
+
+And that?
+
+That’s something rare.
+
+That’s something I admire.
+
+I’m really glad you’re still here.
 
 Happy Birthday.
 
-…you matter more than you think.`;
+…you mean more than you realize.
+
+And I hope,
+someday,
+
+you see yourself
+the way I do.`;
 
   typeText(msg, document.getElementById("finalText"), () => {
     document.getElementById("restartBtn").classList.remove("hidden");
