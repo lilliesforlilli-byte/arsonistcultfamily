@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Dad ☀️</title>
+  <title>Dad 🎉</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: black;
+      background: linear-gradient(135deg, #1a1a40, #3a0ca3);
       color: white;
       overflow: hidden;
       text-align: center;
@@ -20,11 +20,12 @@
     }
 
     .text {
-      font-size: 22px;
+      font-size: 24px;
       max-width: 80%;
       opacity: 0;
-      transition: opacity 2s ease;
+      transition: opacity 1.5s ease;
       white-space: pre-line;
+      text-shadow: 0 0 10px rgba(0,0,0,0.6);
     }
 
     .visible {
@@ -34,17 +35,39 @@
     button {
       padding: 15px 30px;
       font-size: 18px;
-      background: gold;
+      background: linear-gradient(45deg, #ffbe0b, #fb5607);
       border: none;
-      border-radius: 25px;
+      border-radius: 30px;
       cursor: pointer;
-      box-shadow: 0 0 20px gold;
+      box-shadow: 0 0 20px rgba(255,190,11,0.8);
       margin-top: 30px;
       display: none;
+      color: white;
+      font-weight: bold;
     }
 
-    .glow {
-      background: radial-gradient(circle, rgba(255,215,0,0.25), black);
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Floating confetti */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: white;
+      opacity: 0.7;
+      border-radius: 50%;
+      animation: float 10s linear infinite;
+    }
+
+    @keyframes float {
+      from {
+        transform: translateY(100vh);
+      }
+      to {
+        transform: translateY(-10vh);
+      }
     }
   </style>
 </head>
@@ -57,18 +80,27 @@
 <script>
   const messages = [
     "Some people don’t just exist… they brighten everything they touch.",
-    "You stand strong for others… even when no one sees what you carry.",
+    "You stand strong for us… even when no one sees what you carry.",
     "Strong. Brave. Resilient in ways words can’t fully capture.",
     "And somehow… through everything… you’re still a ray of sunshine.",
-    "Happy Birthday, Dad ☀️\nYou deserve every bit of light you give to others."
+    "Happy Birthday, Dad 🎉\nYou deserve every bit of light you give to others."
   ];
 
   let index = 0;
   const textDiv = document.getElementById("text");
   const celebrateBtn = document.getElementById("celebrateBtn");
 
+  // create confetti
+  for (let i = 0; i < 30; i++) {
+    let dot = document.createElement("div");
+    dot.classList.add("confetti");
+    dot.style.left = Math.random() * 100 + "vw";
+    dot.style.animationDuration = (5 + Math.random() * 5) + "s";
+    dot.style.opacity = Math.random();
+    document.body.appendChild(dot);
+  }
+
   window.onload = () => {
-    document.body.classList.add("glow");
     showText();
   };
 
@@ -82,11 +114,11 @@
       index++;
 
       if (index < messages.length) {
-        setTimeout(showText, 4000);
+        setTimeout(showText, 3500);
       } else {
         setTimeout(() => {
           celebrateBtn.style.display = "block";
-        }, 2000);
+        }, 1500);
       }
 
     }, 300);
