@@ -49,7 +49,11 @@
     }
 
     .glow {
-      background: radial-gradient(circle, rgba(255,215,0,0.2), black);
+      background: radial-gradient(circle, rgba(255,215,0,0.25), black);
+    }
+
+    #scene {
+      opacity: 0;
     }
 
     #celebrateBtn {
@@ -60,15 +64,18 @@
 
 <body>
 
+<!-- START SCREEN -->
 <div id="start" class="screen">
-  <button onclick="startExperience()">Begin</button>
+  <button id="startBtn">Begin</button>
 </div>
 
-<div id="scene" class="screen" style="opacity:0;">
+<!-- MAIN SCENE -->
+<div id="scene" class="screen">
   <div id="text" class="text"></div>
-  <button id="celebrateBtn" onclick="rickroll()">Continue to Celebration 🎉</button>
+  <button id="celebrateBtn">Continue to Celebration 🎉</button>
 </div>
 
+<!-- MUSIC -->
 <audio id="music" loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
@@ -84,18 +91,31 @@
 
   let index = 0;
 
+  const startBtn = document.getElementById("startBtn");
+  const celebrateBtn = document.getElementById("celebrateBtn");
+
+  startBtn.addEventListener("click", startExperience);
+  celebrateBtn.addEventListener("click", rickroll);
+
   function startExperience() {
-    document.getElementById("start").style.opacity = 0;
-    document.getElementById("scene").style.opacity = 1;
+    const startScreen = document.getElementById("start");
+    const scene = document.getElementById("scene");
+
+    startScreen.style.display = "none";
+    scene.style.opacity = "1";
+
     document.body.classList.add("glow");
 
-    document.getElementById("music").play();
+    // Safe audio play (won’t break if blocked)
+    const music = document.getElementById("music");
+    music.play().catch(() => {});
 
     showText();
   }
 
   function showText() {
     const textDiv = document.getElementById("text");
+
     textDiv.classList.remove("visible");
 
     setTimeout(() => {
@@ -107,13 +127,12 @@
       if (index < messages.length) {
         setTimeout(showText, 4000);
       } else {
-        // SHOW BUTTON AFTER FINAL MESSAGE
         setTimeout(() => {
-          document.getElementById("celebrateBtn").style.display = "block";
+          celebrateBtn.style.display = "block";
         }, 2000);
       }
 
-    }, 500);
+    }, 300);
   }
 
   function rickroll() {
