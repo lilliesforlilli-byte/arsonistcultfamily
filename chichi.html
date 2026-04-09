@@ -12,28 +12,11 @@
       color: white;
       overflow: hidden;
       text-align: center;
-    }
-
-    .screen {
-      position: absolute;
-      width: 100%;
-      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+      height: 100vh;
       flex-direction: column;
-      transition: opacity 1.5s ease;
-    }
-
-    button {
-      padding: 15px 30px;
-      font-size: 18px;
-      background: gold;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      box-shadow: 0 0 20px gold;
-      margin-top: 20px;
     }
 
     .text {
@@ -48,74 +31,48 @@
       opacity: 1;
     }
 
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      background: gold;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 0 20px gold;
+      margin-top: 30px;
+      display: none;
+    }
+
     .glow {
       background: radial-gradient(circle, rgba(255,215,0,0.25), black);
-    }
-
-    #scene {
-      opacity: 0;
-    }
-
-    #celebrateBtn {
-      display: none;
     }
   </style>
 </head>
 
 <body>
 
-<!-- START SCREEN -->
-<div id="start" class="screen">
-  <button id="startBtn">Begin</button>
-</div>
-
-<!-- MAIN SCENE -->
-<div id="scene" class="screen">
-  <div id="text" class="text"></div>
-  <button id="celebrateBtn">Continue to Celebration 🎉</button>
-</div>
-
-<!-- MUSIC -->
-<audio id="music" loop>
-  <source src="music.mp3" type="audio/mpeg">
-</audio>
+<div id="text" class="text"></div>
+<button id="celebrateBtn">Continue to Celebration 🎉</button>
 
 <script>
   const messages = [
     "Some people don’t just exist… they brighten everything they touch.",
     "You stand strong for others… even when no one sees what you carry.",
-    "Kind. Funny. Unbreakable in ways the world will never fully understand.",
+    "Strong. Brave. Resilient in ways words can’t fully capture.",
     "And somehow… through everything… you’re still a ray of sunshine.",
     "Happy Birthday, Dad ☀️\nYou deserve every bit of light you give to others."
   ];
 
   let index = 0;
-
-  const startBtn = document.getElementById("startBtn");
+  const textDiv = document.getElementById("text");
   const celebrateBtn = document.getElementById("celebrateBtn");
 
-  startBtn.addEventListener("click", startExperience);
-  celebrateBtn.addEventListener("click", rickroll);
-
-  function startExperience() {
-    const startScreen = document.getElementById("start");
-    const scene = document.getElementById("scene");
-
-    startScreen.style.display = "none";
-    scene.style.opacity = "1";
-
+  window.onload = () => {
     document.body.classList.add("glow");
-
-    // Safe audio play (won’t break if blocked)
-    const music = document.getElementById("music");
-    music.play().catch(() => {});
-
     showText();
-  }
+  };
 
   function showText() {
-    const textDiv = document.getElementById("text");
-
     textDiv.classList.remove("visible");
 
     setTimeout(() => {
@@ -135,9 +92,9 @@
     }, 300);
   }
 
-  function rickroll() {
+  celebrateBtn.addEventListener("click", () => {
     window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-  }
+  });
 </script>
 
 </body>
